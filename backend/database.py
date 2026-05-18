@@ -21,13 +21,23 @@ class Base(DeclarativeBase):
     pass
 
 
-# Create async engine
+from sqlalchemy.pool import NullPool
+
+# Create async engine with dynamic pooling based on environment
+engine_kwargs = {
+    "echo": not settings.is_production,
+    "future": True,
+}
+
+if settings.environment == "test":
+    engine_kwargs["poolclass"] = NullPool
+else:
+    engine_kwargs["pool_size"] = settings.db_pool_size
+    engine_kwargs["max_overflow"] = settings.db_max_overflow
+
 engine: AsyncEngine = create_async_engine(
     settings.database_url,
-    pool_size=settings.db_pool_size,
-    max_overflow=settings.db_max_overflow,
-    echo=not settings.is_production,
-    future=True,
+    **engine_kwargs
 )
 
 # Session factory
