@@ -2,22 +2,22 @@
 Tests for data processor: file reading, column mapping, value normalization.
 """
 
-import pytest
 import pandas as pd
-from io import BytesIO
+import pytest
+
 from backend.data_processor import (
+    apply_mappings,
     get_sample_data,
+    normalize_category,
+    normalize_fuel_type,
     parse_date,
     parse_float,
-    normalize_fuel_type,
-    normalize_category,
-    apply_mappings,
     process_dataframe,
 )
 from backend.schemas import ColumnMapping
 
-
 # ─── parse_date ───────────────────────────────────────────────────────────────
+
 
 def test_parse_date_iso():
     result = parse_date("2024-01-15")
@@ -40,6 +40,7 @@ def test_parse_date_none():
 
 # ─── parse_float ──────────────────────────────────────────────────────────────
 
+
 def test_parse_float_standard():
     assert parse_float("123.45") == pytest.approx(123.45)
 
@@ -61,6 +62,7 @@ def test_parse_float_none():
 
 # ─── normalize_fuel_type ──────────────────────────────────────────────────────
 
+
 def test_normalize_fuel_type_turkish():
     assert normalize_fuel_type("Mazot") == "diesel"
     assert normalize_fuel_type("motorin") == "diesel"
@@ -80,6 +82,7 @@ def test_normalize_fuel_type_unknown():
 
 # ─── normalize_category ──────────────────────────────────────────────────────
 
+
 def test_normalize_category():
     assert normalize_category("mobile_combustion") == "mobile_combustion"
     assert normalize_category("araç") == "mobile_combustion"
@@ -89,11 +92,14 @@ def test_normalize_category():
 
 # ─── sample_data ─────────────────────────────────────────────────────────────
 
+
 def test_get_sample_data():
-    df = pd.DataFrame({
-        "Tarih": ["2024-01-01", "2024-01-02", None],
-        "Miktar": ["100", "200", "300"],
-    })
+    df = pd.DataFrame(
+        {
+            "Tarih": ["2024-01-01", "2024-01-02", None],
+            "Miktar": ["100", "200", "300"],
+        }
+    )
     result = get_sample_data(df, n=5)
     assert "Tarih" in result
     assert len(result["Tarih"]) == 2  # None excluded
@@ -102,6 +108,7 @@ def test_get_sample_data():
 
 # ─── apply_mappings ──────────────────────────────────────────────────────────
 
+
 def test_apply_mappings_basic():
     row = {
         "Tarih": "2024-01-15",
@@ -109,12 +116,13 @@ def test_apply_mappings_basic():
         "Plaka": "34ABC123",
     }
     mappings = [
-        ColumnMapping(source_column="Tarih", target_field="date",
-                      confidence=0.9, sample_values=[]),
-        ColumnMapping(source_column="Litre", target_field="amount",
-                      confidence=0.95, sample_values=[]),
-        ColumnMapping(source_column="Plaka", target_field="vehicle_id",
-                      confidence=0.85, sample_values=[]),
+        ColumnMapping(source_column="Tarih", target_field="date", confidence=0.9, sample_values=[]),
+        ColumnMapping(
+            source_column="Litre", target_field="amount", confidence=0.95, sample_values=[]
+        ),
+        ColumnMapping(
+            source_column="Plaka", target_field="vehicle_id", confidence=0.85, sample_values=[]
+        ),
     ]
     record, errors = apply_mappings(row, mappings, "mobile_combustion", "diesel")
     assert record["amount"] == 500.0
@@ -127,8 +135,9 @@ def test_apply_mappings_basic():
 def test_apply_mappings_invalid_amount():
     row = {"Miktar": "abc-invalid"}
     mappings = [
-        ColumnMapping(source_column="Miktar", target_field="amount",
-                      confidence=0.8, sample_values=[])
+        ColumnMapping(
+            source_column="Miktar", target_field="amount", confidence=0.8, sample_values=[]
+        )
     ]
     record, errors = apply_mappings(row, mappings, "other", None)
     assert record["amount"] is None
@@ -137,19 +146,23 @@ def test_apply_mappings_invalid_amount():
 
 # ─── process_dataframe ───────────────────────────────────────────────────────
 
+
 def test_process_dataframe():
-    df = pd.DataFrame({
-        "Tarih":  ["2024-01-01", "2024-01-02", "BAD_DATE"],
-        "Litre":  ["100",        "200",         "not-a-number"],
-        "Plaka":  ["34ABC",      "06XYZ",       "01DEF"],
-    })
+    df = pd.DataFrame(
+        {
+            "Tarih": ["2024-01-01", "2024-01-02", "BAD_DATE"],
+            "Litre": ["100", "200", "not-a-number"],
+            "Plaka": ["34ABC", "06XYZ", "01DEF"],
+        }
+    )
     mappings = [
-        ColumnMapping(source_column="Tarih", target_field="date",
-                      confidence=0.9, sample_values=[]),
-        ColumnMapping(source_column="Litre", target_field="amount",
-                      confidence=0.9, sample_values=[]),
-        ColumnMapping(source_column="Plaka", target_field="vehicle_id",
-                      confidence=0.9, sample_values=[]),
+        ColumnMapping(source_column="Tarih", target_field="date", confidence=0.9, sample_values=[]),
+        ColumnMapping(
+            source_column="Litre", target_field="amount", confidence=0.9, sample_values=[]
+        ),
+        ColumnMapping(
+            source_column="Plaka", target_field="vehicle_id", confidence=0.9, sample_values=[]
+        ),
     ]
     valid, errors = process_dataframe(df, mappings, "mobile_combustion", "diesel")
     assert len(valid) + len(errors) == 3

@@ -2,18 +2,18 @@
 Analytics router: dashboard stats, category breakdowns, exports.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc
-from loguru import logger
-import io
 import csv
+import io
 import json
 
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+from sqlalchemy import desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.database import get_db
-from backend.models import UploadJob, MappedRecord
-from backend.schemas import DashboardStats, CategorySummary, JobListItem
+from backend.models import MappedRecord, UploadJob
+from backend.schemas import CategorySummary, DashboardStats
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
@@ -31,7 +31,7 @@ async def get_dashboard(db: AsyncSession = Depends(get_db)):
     total_records = total_records_result.scalar() or 0
 
     valid_result = await db.execute(
-        select(func.count()).select_from(MappedRecord).where(MappedRecord.is_valid == True)
+        select(func.count()).select_from(MappedRecord).where(MappedRecord.is_valid.is_(True))
     )
     valid_records = valid_result.scalar() or 0
     error_records = total_records - valid_records
@@ -95,9 +95,7 @@ async def export_records_csv(
         raise HTTPException(status_code=404, detail="Job not found")
 
     records_result = await db.execute(
-        select(MappedRecord)
-        .where(MappedRecord.job_id == job_id)
-        .order_by(MappedRecord.row_number)
+        select(MappedRecord).where(MappedRecord.job_id == job_id).order_by(MappedRecord.row_number)
     )
     records = records_result.scalars().all()
 
@@ -105,30 +103,46 @@ async def export_records_csv(
     writer = csv.writer(output)
 
     # Header
-    writer.writerow([
-        "row_number", "emission_category", "fuel_type", "amount", "unit",
-        "date", "vehicle_id", "description", "supplier", "cost", "currency",
-        "location", "is_valid", "confidence_score", "validation_errors"
-    ])
+    writer.writerow(
+        [
+            "row_number",
+            "emission_category",
+            "fuel_type",
+            "amount",
+            "unit",
+            "date",
+            "vehicle_id",
+            "description",
+            "supplier",
+            "cost",
+            "currency",
+            "location",
+            "is_valid",
+            "confidence_score",
+            "validation_errors",
+        ]
+    )
 
     for rec in records:
-        writer.writerow([
-            rec.row_number,
-            rec.emission_category or "",
-            rec.fuel_type or "",
-            rec.amount or "",
-            rec.unit or "",
-            rec.date.isoformat() if rec.date else "",
-            rec.vehicle_id or "",
-            rec.description or "",
-            rec.supplier or "",
-            rec.cost or "",
-            rec.currency or "",
-            rec.location or "",
-            rec.is_valid,
-            rec.confidence_score or "",
-            "; ".join(rec.validation_errors) if rec.validation_errors else "",
-        ])
+        writer.writerow(
+            [
+                rec.row_number,
+                rec.emission_category or "",
+                rec.fuel_type or "",
+                rec.amount or "",
+                rec.unit or "",
+                rec.date.isoformat() if rec.date else "",
+                rec.vehicle_id or "",
+                rec.description or "",
+                rec.supplier or "",
+                rec.cost or "",
+                rec.currency or "",
+                rec.location or "",
+                rec.is_valid,
+                rec.confidence_score or "",
+                "; ".join(rec.validation_errors) if rec.validation_errors else "",
+            ]
+        )
 
     output.seek(0)
     filename = f"ai_erp_export_{job_id[:8]}.csv"
@@ -151,9 +165,7 @@ async def export_records_json(
         raise HTTPException(status_code=404, detail="Job not found")
 
     records_result = await db.execute(
-        select(MappedRecord)
-        .where(MappedRecord.job_id == job_id)
-        .order_by(MappedRecord.row_number)
+        select(MappedRecord).where(MappedRecord.job_id == job_id).order_by(MappedRecord.row_number)
     )
     records = records_result.scalars().all()
 

@@ -2,9 +2,8 @@
 Celery application configuration and task definitions.
 """
 
-import asyncio
 from celery import Celery
-from loguru import logger
+
 from backend.config import settings
 
 # ─── Celery App ───────────────────────────────────────────────────────────────
@@ -26,7 +25,7 @@ celery_app.conf.update(
     task_acks_late=True,
     worker_prefetch_multiplier=1,
     result_expires=86400,  # 24 hours
-    task_soft_time_limit=300,   # 5 minutes soft limit
-    task_time_limit=600,        # 10 minutes hard limit
+    task_soft_time_limit=300,  # 5 minutes soft limit
+    task_time_limit=600,  # 10 minutes hard limit
     broker_connection_retry_on_startup=True,
 )

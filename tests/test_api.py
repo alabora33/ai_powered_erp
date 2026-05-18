@@ -3,10 +3,11 @@ FastAPI integration tests using TestClient.
 Tests run against an in-memory SQLite database.
 """
 
-import pytest
 import io
+from unittest.mock import patch
+
+import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock
 
 
 @pytest.fixture
@@ -15,6 +16,7 @@ def client():
     with patch("backend.tasks.process_upload.delay") as mock_task:
         mock_task.return_value.id = "test-task-id"
         from backend.main import app
+
         with TestClient(app) as c:
             yield c
 
@@ -51,7 +53,13 @@ def test_upload_empty_file(client):
     empty = io.BytesIO(b"")
     res = client.post(
         "/api/upload",
-        files={"file": ("test.xlsx", empty, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        files={
+            "file": (
+                "test.xlsx",
+                empty,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        },
     )
     assert res.status_code == 400
 

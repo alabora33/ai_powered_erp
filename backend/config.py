@@ -4,8 +4,9 @@ All settings are loaded from environment variables or .env file.
 """
 
 from functools import lru_cache
-from pydantic_settings import BaseSettings, SettingsConfigDict
+
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -59,7 +60,7 @@ class Settings(BaseSettings):
         return self.max_file_size_mb * 1024 * 1024
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """Return cached settings instance."""
     return Settings()

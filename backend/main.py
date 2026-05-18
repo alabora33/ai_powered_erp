@@ -4,6 +4,7 @@ FastAPI main application entry point.
 
 import os
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -11,12 +12,12 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from backend.config import settings
-from backend.database import create_tables, check_db_connection
-from backend.routers.upload import router as upload_router
+from backend.database import check_db_connection, create_tables
 from backend.routers.analytics import router as analytics_router
-
+from backend.routers.upload import router as upload_router
 
 # ─── Lifespan ─────────────────────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -82,7 +83,9 @@ app.include_router(analytics_router)
 
 # ─── Health Check ─────────────────────────────────────────────────────────────
 
+
 @app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
 async def health_check():
     """System health check endpoint."""
     db_ok = await check_db_connection()
@@ -91,6 +94,7 @@ async def health_check():
     redis_ok = False
     try:
         import redis
+
         r = redis.from_url(settings.redis_url, socket_timeout=2)
         r.ping()
         redis_ok = True

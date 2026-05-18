@@ -5,12 +5,12 @@ Uses structured output (JSON mode) for reliable parsing.
 
 import json
 import re
-from typing import Optional
+
 import google.generativeai as genai
 from loguru import logger
+
 from backend.config import settings
 from backend.schemas import AIAnalysisResult, ColumnMapping
-
 
 # Configure Gemini
 genai.configure(api_key=settings.gemini_api_key)
@@ -123,9 +123,7 @@ class AIService:
 
         try:
             logger.info(f"Sending {len(columns)} columns to Gemini for analysis...")
-            response = self.model.generate_content(
-                [SYSTEM_PROMPT, prompt]
-            )
+            response = self.model.generate_content([SYSTEM_PROMPT, prompt])
             raw_text = response.text.strip()
 
             # Strip markdown code blocks if present
@@ -155,7 +153,7 @@ class AIService:
         logger.warning("Using heuristic fallback analysis...")
         mappings = []
 
-        KEYWORD_MAP = {
+        keyword_map = {
             # Date keywords
             ("tarih", "date", "tarih", "invoice_date", "transaction_date"): "date",
             # Amount keywords
@@ -181,20 +179,22 @@ class AIService:
             target = "description"  # default
             confidence = 0.5
 
-            for keywords, field in KEYWORD_MAP.items():
+            for keywords, field in keyword_map.items():
                 if any(kw in col_lower for kw in keywords):
                     target = field
                     confidence = 0.7
                     break
 
-            mappings.append(ColumnMapping(
-                source_column=col,
-                target_field=target,
-                confidence=confidence,
-                transformation="none",
-                sample_values=sample_data.get(col, [])[:3],
-                notes="Heuristic mapping (AI unavailable)",
-            ))
+            mappings.append(
+                ColumnMapping(
+                    source_column=col,
+                    target_field=target,
+                    confidence=confidence,
+                    transformation="none",
+                    sample_values=sample_data.get(col, [])[:3],
+                    notes="Heuristic mapping (AI unavailable)",
+                )
+            )
 
         return AIAnalysisResult(
             detected_mappings=mappings,

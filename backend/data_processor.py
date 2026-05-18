@@ -3,19 +3,19 @@ Data Processor: Reads Excel/CSV files, applies AI-detected mappings,
 validates records, and saves to the database.
 """
 
-import os
 import uuid
-from pathlib import Path
 from datetime import datetime
-from typing import Optional, Any
+from pathlib import Path
+from typing import Any
+
 import pandas as pd
 from loguru import logger
 
 from backend.config import settings
 from backend.schemas import ColumnMapping
 
-
 # ─── File Reading ─────────────────────────────────────────────────────────────
+
 
 def read_file(file_path: str) -> pd.DataFrame:
     """Read Excel or CSV file into a DataFrame."""
@@ -29,6 +29,7 @@ def read_file(file_path: str) -> pd.DataFrame:
     elif ext == ".csv":
         # Try to detect encoding
         import chardet
+
         with open(file_path, "rb") as f:
             raw = f.read(10000)
         enc = chardet.detect(raw).get("encoding", "utf-8") or "utf-8"
@@ -58,18 +59,20 @@ def get_sample_data(df: pd.DataFrame, n: int = 10) -> dict[str, list]:
 
 # ─── Value Transformers ───────────────────────────────────────────────────────
 
-def parse_date(value: Any) -> Optional[datetime]:
+
+def parse_date(value: Any) -> datetime | None:
     """Parse various date formats."""
     if value is None or str(value).strip() in ("", "nan", "None"):
         return None
     from dateutil.parser import parse as dateutil_parse
+
     try:
         return dateutil_parse(str(value), dayfirst=True)
     except Exception:
         return None
 
 
-def parse_float(value: Any) -> Optional[float]:
+def parse_float(value: Any) -> float | None:
     """Parse numeric value, handling Turkish decimal notation."""
     if value is None or str(value).strip() in ("", "nan", "None"):
         return None
@@ -85,12 +88,22 @@ def parse_float(value: Any) -> Optional[float]:
 
 
 FUEL_TYPE_MAP = {
-    "mazot": "diesel", "motorin": "diesel", "dizel": "diesel", "diesel": "diesel",
-    "benzin": "gasoline", "petrol": "gasoline", "gasoline": "gasoline",
-    "lpg": "lpg", "tüpgaz": "lpg",
-    "doğalgaz": "natural_gas", "dogalgaz": "natural_gas", "natural_gas": "natural_gas",
-    "kömür": "coal", "coal": "coal",
-    "elektrik": "electricity", "electricity": "electricity",
+    "mazot": "diesel",
+    "motorin": "diesel",
+    "dizel": "diesel",
+    "diesel": "diesel",
+    "benzin": "gasoline",
+    "petrol": "gasoline",
+    "gasoline": "gasoline",
+    "lpg": "lpg",
+    "tüpgaz": "lpg",
+    "doğalgaz": "natural_gas",
+    "dogalgaz": "natural_gas",
+    "natural_gas": "natural_gas",
+    "kömür": "coal",
+    "coal": "coal",
+    "elektrik": "electricity",
+    "electricity": "electricity",
 }
 
 CATEGORY_MAP = {
@@ -115,7 +128,7 @@ CATEGORY_MAP = {
 }
 
 
-def normalize_fuel_type(value: Any) -> Optional[str]:
+def normalize_fuel_type(value: Any) -> str | None:
     """Normalize fuel type to standard enum value."""
     if not value:
         return None
@@ -126,7 +139,7 @@ def normalize_fuel_type(value: Any) -> Optional[str]:
     return "other"
 
 
-def normalize_category(value: Any) -> Optional[str]:
+def normalize_category(value: Any) -> str | None:
     """Normalize emission category."""
     if not value:
         return None
@@ -139,11 +152,12 @@ def normalize_category(value: Any) -> Optional[str]:
 
 # ─── Row Mapping ──────────────────────────────────────────────────────────────
 
+
 def apply_mappings(
     row: dict,
     mappings: list[ColumnMapping],
     default_category: str,
-    default_fuel_type: Optional[str],
+    default_fuel_type: str | None,
 ) -> tuple[dict, list[str]]:
     """
     Apply AI column mappings to a single row.
@@ -197,11 +211,12 @@ def apply_mappings(
 
 # ─── Full File Processing ─────────────────────────────────────────────────────
 
+
 def process_dataframe(
     df: pd.DataFrame,
     mappings: list[ColumnMapping],
     default_category: str,
-    default_fuel_type: Optional[str],
+    default_fuel_type: str | None,
 ) -> tuple[list[dict], list[dict]]:
     """
     Process entire DataFrame with mappings.
@@ -228,13 +243,13 @@ def process_dataframe(
             valid_records.append(record)
 
     logger.info(
-        f"✅ Processed {len(df)} rows: {len(valid_records)} valid, "
-        f"{len(error_records)} with errors"
+        f"✅ Processed {len(df)} rows: {len(valid_records)} valid, {len(error_records)} with errors"
     )
     return valid_records, error_records
 
 
 # ─── File Save ────────────────────────────────────────────────────────────────
+
 
 def save_upload_file(content: bytes, original_filename: str) -> tuple[str, str]:
     """

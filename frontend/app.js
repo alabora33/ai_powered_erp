@@ -49,7 +49,7 @@ async function apiFetch(path, opts = {}) {
 /* ─── Health Check ─────────────────────────────────────────── */
 async function checkHealth() {
   try {
-    const data = await fetch('/health').then(r => r.json());
+    const data = await fetch('/api/health').then(r => r.json());
     const dot = document.getElementById('healthDot');
     const txt = document.getElementById('healthText');
     if (data.status === 'healthy') {

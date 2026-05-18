@@ -4,21 +4,22 @@ Upload router: file upload, job management, status polling.
 
 import os
 from pathlib import Path
-from typing import Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, BackgroundTasks
-from fastapi.responses import JSONResponse
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc
-from loguru import logger
 
-from backend.database import get_db
-from backend.models import UploadJob, MappedRecord
-from backend.schemas import (
-    UploadResponse, JobStatus, JobListItem, RecordListResponse,
-    MappedRecordOut
-)
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from loguru import logger
+from sqlalchemy import desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.config import settings
 from backend.data_processor import save_upload_file
+from backend.database import get_db
+from backend.models import MappedRecord, UploadJob
+from backend.schemas import (
+    JobListItem,
+    JobStatus,
+    RecordListResponse,
+    UploadResponse,
+)
 
 router = APIRouter(prefix="/api/upload", tags=["Upload & Processing"])
 
@@ -71,6 +72,7 @@ async def upload_file(
 
         # Dispatch Celery task
         from backend.tasks import process_upload
+
         task = process_upload.delay(job_id)
 
         # Update task_id
@@ -93,7 +95,7 @@ async def upload_file(
 async def list_jobs(
     limit: int = 20,
     offset: int = 0,
-    status: Optional[str] = None,
+    status: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """List all upload jobs, most recent first."""
@@ -136,11 +138,13 @@ async def get_job_records(
     offset = (page - 1) * page_size
 
     query = select(MappedRecord).where(MappedRecord.job_id == job_id)
-    count_query = select(func.count()).select_from(MappedRecord).where(MappedRecord.job_id == job_id)
+    count_query = (
+        select(func.count()).select_from(MappedRecord).where(MappedRecord.job_id == job_id)
+    )
 
     if valid_only:
-        query = query.where(MappedRecord.is_valid == True)
-        count_query = count_query.where(MappedRecord.is_valid == True)
+        query = query.where(MappedRecord.is_valid.is_(True))
+        count_query = count_query.where(MappedRecord.is_valid.is_(True))
 
     query = query.order_by(MappedRecord.row_number).limit(page_size).offset(offset)
 

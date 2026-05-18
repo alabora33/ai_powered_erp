@@ -2,20 +2,22 @@
 SQLAlchemy async database engine & session management.
 """
 
+from loguru import logger
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
     AsyncEngine,
+    AsyncSession,
     async_sessionmaker,
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import text
+
 from backend.config import settings
-from loguru import logger
 
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
+
     pass
 
 

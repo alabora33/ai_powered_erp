@@ -4,13 +4,12 @@ Each task updates job status in the DB as it progresses.
 """
 
 import asyncio
-from datetime import datetime, timezone
-from celery import shared_task
+from datetime import UTC, datetime
+
 from loguru import logger
 from sqlalchemy import select
 
 from backend.celery_app import celery_app
-from backend.config import settings
 
 
 def run_async(coro):
@@ -39,11 +38,10 @@ def process_upload(self, job_id: str) -> dict:
 
 async def _process_upload_async(task, job_id: str) -> dict:
     """Async implementation of the processing pipeline."""
-    from backend.database import AsyncSessionLocal
-    from backend.models import UploadJob, MappedRecord
-    from backend.data_processor import read_file, get_sample_data, process_dataframe
     from backend.ai_service import ai_service
-    from backend.schemas import ColumnMapping
+    from backend.data_processor import get_sample_data, process_dataframe, read_file
+    from backend.database import AsyncSessionLocal
+    from backend.models import MappedRecord, UploadJob
 
     async with AsyncSessionLocal() as db:
         # 1. Fetch job from DB
@@ -112,7 +110,7 @@ async def _process_upload_async(task, job_id: str) -> dict:
             batch_size = 100
 
             for i in range(0, len(all_records), batch_size):
-                batch = all_records[i:i + batch_size]
+                batch = all_records[i : i + batch_size]
                 for rec in batch:
                     db_record = MappedRecord(
                         job_id=job_id,
@@ -150,7 +148,7 @@ async def _process_upload_async(task, job_id: str) -> dict:
                 for r in error_records[:50]  # Cap error details at 50
             ]
             job.data_quality_score = ai_result.confidence_overall
-            job.completed_at = datetime.now(timezone.utc)
+            job.completed_at = datetime.now(UTC)
             await db.commit()
 
             logger.info(
