@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI ERP – Akıllı Veri Eşleştirme Sistemi</title>
+  <meta name="description" content="Excel, CSV ve ERP dosyalarınızı yapay zeka ile otomatik analiz edin ve standart veri modeline dönüştürün." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+          <path d="M7 14L11 10L15 14L21 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="21" cy="20" r="3" fill="white" opacity="0.7"/>
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="logo-text">AI ERP</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-page="upload" id="nav-upload">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Dosya Yükle</span>
+      </a>
+      <a href="#" class="nav-item" data-page="jobs" id="nav-jobs">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>İşler</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="ai-badge">
+        <span class="ai-dot"></span>
+        <span>Gemini AI Aktif</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ────────────────────────────────────────────────────── -->
+  <main class="main-content">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <p class="page-subtitle" id="pageSubtitle">Genel bakış ve istatistikler</p>
+      </div>
+      <div class="topbar-right">
+        <div class="health-indicator" id="healthIndicator">
+          <span class="health-dot" id="healthDot"></span>
+          <span id="healthText">Kontrol ediliyor...</span>
+        </div>
+        <button class="btn btn-primary" onclick="showPage('upload')" id="topUploadBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Dosya Yükle
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Dashboard Page ───────────────────────────────────────── -->
+    <section class="page active" id="page-dashboard">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card" id="stat-jobs">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#6366f1,#8b5cf6)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="statJobs">–</div>
+            <div class="stat-label">Toplam İş</div>
+          </div>
+        </div>
+
+        <div class="stat-card" id="stat-records">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#10b981,#059669)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="statRecords">–</div>
+            <div class="stat-label">Toplam Kayıt</div>
+          </div>
+        </div>
+
+        <div class="stat-card" id="stat-valid">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#3b82f6,#2563eb)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="statValid">–</div>
+            <div class="stat-label">Geçerli Kayıt</div>
+          </div>
+        </div>
+
+        <div class="stat-card" id="stat-quality">
+          <div class="stat-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706)">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-value" id="statQuality">–</div>
+            <div class="stat-label">Ortalama Kalite</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories & Recent Jobs -->
+      <div class="dashboard-bottom">
+
+        <!-- Categories -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Emisyon Kategorileri</h2>
+          </div>
+          <div class="card-body" id="categoriesContainer">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+              <p>Henüz kategori verisi yok</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Jobs -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Son İşler</h2>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('jobs')">Tümünü Gör →</button>
+          </div>
+          <div class="card-body" id="recentJobsContainer">
+            <div class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              <p>Henüz iş yok. <a href="#" onclick="showPage('upload')">Dosya yükleyin</a></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Upload Page ───────────────────────────────────────────── -->
+    <section class="page" id="page-upload">
+
+      <div class="upload-container">
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-inner">
+            <div class="drop-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            </div>
+            <h2 class="drop-title">Excel / CSV Dosyası Yükleyin</h2>
+            <p class="drop-subtitle">Sürükleyip bırakın veya tıklayarak seçin</p>
+            <p class="drop-hint">Desteklenen formatlar: .xlsx, .xls, .csv — Maks 50MB</p>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden />
+            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+              Dosya Seç
+            </button>
+          </div>
+
+          <!-- Selected File Preview -->
+          <div class="file-preview" id="filePreview" style="display:none">
+            <div class="file-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="file-info">
+              <div class="file-name" id="previewFileName">–</div>
+              <div class="file-size" id="previewFileSize">–</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="clearFileBtn">✕</button>
+          </div>
+        </div>
+
+        <!-- AI Features Info -->
+        <div class="ai-features-grid">
+          <div class="ai-feature">
+            <div class="ai-feature-icon">🧠</div>
+            <div>
+              <h3>Akıllı Kolon Tanıma</h3>
+              <p>Türkçe ve İngilizce başlıkları otomatik algılar</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon">🗂️</div>
+            <div>
+              <h3>Otomatik Kategorizasyon</h3>
+              <p>Emisyon türünü ve yakıt tipini tespit eder</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon">✅</div>
+            <div>
+              <h3>Veri Kalite Kontrolü</h3>
+              <p>Eksik ve hatalı satırları raporlar</p>
+            </div>
+          </div>
+          <div class="ai-feature">
+            <div class="ai-feature-icon">📤</div>
+            <div>
+              <h3>CSV / JSON Export</h3>
+              <p>Temizlenmiş veriyi dilediğiniz formatta indirin</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Button -->
+        <div class="upload-actions" id="uploadActions" style="display:none">
+          <button class="btn btn-primary btn-lg" id="uploadBtn" onclick="startUpload()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            AI ile Analiz Et
+          </button>
+        </div>
+
+        <!-- Upload Progress -->
+        <div class="upload-progress-card" id="uploadProgressCard" style="display:none">
+          <div class="progress-header">
+            <div class="progress-title" id="progressTitle">Yükleniyor...</div>
+            <div class="progress-pct" id="progressPct">0%</div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="progressBar" style="width:0%"></div>
+          </div>
+          <div class="progress-steps">
+            <div class="step" id="step1">📁 Dosya okunuyor</div>
+            <div class="step" id="step2">🤖 AI analiz yapıyor</div>
+            <div class="step" id="step3">⚙️ Kolonlar eşleştiriliyor</div>
+            <div class="step" id="step4">💾 Veritabanına kaydediliyor</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── Jobs Page ─────────────────────────────────────────────── -->
+    <section class="page" id="page-jobs">
+      <div class="jobs-header">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-status="" onclick="filterJobs('')">Tümü</button>
+          <button class="filter-tab" data-status="pending" onclick="filterJobs('pending')">Bekliyor</button>
+          <button class="filter-tab" data-status="processing" onclick="filterJobs('processing')">İşleniyor</button>
+          <button class="filter-tab" data-status="completed" onclick="filterJobs('completed')">Tamamlandı</button>
+          <button class="filter-tab" data-status="failed" onclick="filterJobs('failed')">Hatalı</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="loadJobs()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Yenile
+        </button>
+      </div>
+
+      <div class="jobs-list" id="jobsList">
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          <p>Henüz iş yok</p>
+          <button class="btn btn-primary btn-sm" onclick="showPage('upload')">İlk Dosyayı Yükle</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Job Detail Modal ──────────────────────────────────────── -->
+    <div class="modal-overlay" id="jobModal" style="display:none">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modalTitle">İş Detayı</h2>
+            <p class="modal-subtitle" id="modalSubtitle">–</p>
+          </div>
+          <button class="modal-close" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
