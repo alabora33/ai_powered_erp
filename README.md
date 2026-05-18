@@ -47,10 +47,21 @@ Giren / Çıkan Tutar                  →   tutar         = <sayı>
 | Özellik | Açıklama |
 |---|---|
 | 🌍 **Tam i18n Desteği** | Kullanıcı arayüzü ve AI raporları tek tıkla **Türkçe / İngilizce** değişir |
-| 🗂️ **Dinamik Şablonlar** | E-Ticaret, İK, Bankacılık ve Yakıt tüketimi için dinamik Mapping yeteneği |
+| 🗂️ **Dinamik Şablon Sistemi** | Sadece tek bir amaca hizmet etmez. E-Ticaret Ürünleri, İK Maaş Tabloları, Banka Ekstreleri ve Araç Yakıt Tüketimi gibi tamamen farklı şemaları (şablonları) destekler. Kendi JSON şablonunuzu ekleyebilirsiniz. |
 | 🧠 **Akıllı Başlık Tespiti** | Dosya başındaki gereksiz logoları ve bilgileri atlayıp asıl veriyi bulur |
 | ✅ **Veri Kalite Kontrolü** | AI her satırı kontrol eder, hatalı ve eksik verileri size raporlar |
 | 💬 **AI Durum Özeti** | Yapılan işlemi insancıl bir dille özetler ("Bu dosya lojistik firmasına aittir...") |
+
+---
+
+## 📑 Hazır Şablonlar (Templates)
+
+Sistem içerisinde anında kullanıma hazır 4 farklı iş modülü şablonu bulunmaktadır. Kullanıcılar yükledikleri veriyi bu şablonlardan birine haritalandırabilir:
+
+1. **Banka Ekstresi Şablonu:** `İşlem Tarihi`, `Açıklama`, `Tutar`, `Bakiye` kolonlarına otomatik eşleşme yapar.
+2. **Araç Yakıt Tüketimi Şablonu:** `Plaka`, `Yakıt Türü`, `Litre`, `Tutar` kolonlarını çıkarır ve emisyon kategorisini belirler.
+3. **E-Ticaret Ürün Şablonu:** `Ürün Kodu`, `Kategori`, `Fiyat`, `Stok` verilerini düzenler.
+4. **İK Maaş Tablosu:** `Çalışan ID`, `Departman`, `Net Maaş`, `Vergi` verilerini standartlaştırır.
 
 ---
 
@@ -158,10 +169,21 @@ Incoming / Outgoing                  →   amount        = <number>
 | Feature | Description |
 |---|---|
 | 🌍 **Full i18n Support** | The UI, Data Tables, and even the AI-generated summaries switch between **Turkish & English** instantly |
-| 🗂️ **Dynamic Templates** | Out-of-the-box mappings for E-Commerce, HR, Banking, and Fuel Consumption domains |
+| 🗂️ **Dynamic Template System** | It's not a single-purpose tool. It supports completely different schemas like E-Commerce Products, HR Salary Tables, Bank Statements, and Fuel Consumption out of the box. You can inject your own JSON templates! |
 | 🧠 **Smart Header Detection** | Skips preliminary garbage rows and accurately locates where the actual data table begins |
 | ✅ **Data Quality Control** | The AI parses every row, reporting errors, invalid values, and missing fields dynamically |
 | 💬 **AI Insights** | Provides a human-readable summary of the file ("This file belongs to a logistics firm...") |
+
+---
+
+## 📑 Built-in Templates
+
+The system comes with 4 ready-to-use business module templates. Users can map their uploaded data to any of these schemas dynamically:
+
+1. **Bank Statement Template:** Maps to `Transaction Date`, `Description`, `Amount`, `Balance`.
+2. **Fuel Consumption Template:** Extracts `License Plate`, `Fuel Type`, `Liter`, `Cost`.
+3. **E-Commerce Product Template:** Standardizes `Product Code`, `Category`, `Price`, `Stock`.
+4. **HR Salary Table Template:** Maps `Employee ID`, `Department`, `Net Salary`, `Tax`.
 
 ---
 
@@ -224,7 +246,7 @@ MIT License © 2024 Ali Bora
 
 <div align="center">
 
-Made with ❤️ using **Gemini AI** · **FastAPI** · **PostgreSQL** · **Celery** · **Docker**
+**Developed by Ali Bora**
 
 ⭐ Star this repo if it helped you!
 
