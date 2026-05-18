@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import NullPool
 
 from backend.config import settings
 
@@ -20,8 +21,6 @@ class Base(DeclarativeBase):
 
     pass
 
-
-from sqlalchemy.pool import NullPool
 
 # Create async engine with dynamic pooling based on environment
 engine_kwargs = {
