@@ -34,10 +34,7 @@ else:
     engine_kwargs["pool_size"] = settings.db_pool_size
     engine_kwargs["max_overflow"] = settings.db_max_overflow
 
-engine: AsyncEngine = create_async_engine(
-    settings.database_url,
-    **engine_kwargs
-)
+engine: AsyncEngine = create_async_engine(settings.database_url, **engine_kwargs)
 
 # Session factory
 AsyncSessionLocal = async_sessionmaker(
