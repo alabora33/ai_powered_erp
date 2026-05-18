@@ -10,7 +10,7 @@
 [![Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**[🇹🇷 Türkçe](#-türkçe) · [🇬🇧 English](#-english)**
+**[🇹🇷 Türkçe](#-türkçe) · [EN English](#-english)**
 
 </div>
 
@@ -138,7 +138,7 @@ docker compose logs -f api
 
 ---
 
-# 🇬🇧 English
+# EN English
 
 ## 🎯 What is AI ERP?
 
