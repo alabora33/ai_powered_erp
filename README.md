@@ -1,64 +1,42 @@
-# AI ERP – Akıllı Excel / Veri Eşleştirme Sistemi
-
 <div align="center">
 
-![AI ERP Banner](https://img.shields.io/badge/AI%20ERP-v1.0.0-6366f1?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMmwzLjA5IDYuMjZMMjIgOS4yN2wtNSA0Ljg3IDEuMTggNi44OEwxMiAxNy43N2wtNi4xOCAzLjI1TDcgMTQuMTQgMiA5LjI3bDYuOTEtMS4wMUwxMiAyeiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=)
-![Python](https://img.shields.io/badge/Python-3.12-3776ab?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?style=for-the-badge&logo=google&logoColor=white)
+<img src="https://capsule-render.vercel.app/api?type=waving&color=6366f1&height=200&section=header&text=AI%20ERP&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI-Powered%20Excel%20%2F%20ERP%20Data%20Mapping%20System&descAlignY=55&descAlign=50" width="100%"/>
 
-**Excel, fatura, ERP çıktısı veya CSV yükleyin — AI otomatik olarak kolonları tanısın, kategorize etsin ve standart veri modeline dönüştürsün.**
+[![CI](https://github.com/alabora33/ai_powered_erp/actions/workflows/ci.yml/badge.svg)](https://github.com/alabora33/ai_powered_erp/actions/workflows/ci.yml)
+[![CD](https://github.com/alabora33/ai_powered_erp/actions/workflows/cd.yml/badge.svg)](https://github.com/alabora33/ai_powered_erp/actions/workflows/cd.yml)
+[![Python](https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](https://docker.com)
+[![Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google&logoColor=white)](https://ai.google.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**[🇹🇷 Türkçe](#-türkçe) · [🇬🇧 English](#-english)**
 
 </div>
 
 ---
 
+# 🇹🇷 Türkçe
+
 ## 🎯 Proje Nedir?
 
-Firmalar farklı formatlarda veri tutar: kimisi "Mazot Litre", kimisi "Fuel Consumption (L)", kimisi "yakıt_lt". Bu sistem AI kullanarak bu farklılıkları otomatik algılar ve hepsini tek bir standart modele dönüştürür.
+**AI ERP**, şirketlerin farklı formatlarda tuttuğu Excel, CSV ve ERP çıktı dosyalarını yapay zeka ile **otomatik olarak analiz eden** ve **standart bir veri modeline dönüştüren** bir sistemdir.
 
-### Örnek Dönüşüm
+> Gerçek bir iş problemini çözüyor: "Mazot Litre", "Fuel Consumption (L)", "yakıt_lt" gibi farklı başlıkları AI tek bir standarda indirgüyor.
 
-| Kaynak Dosya | → | Standart Model |
-|---|---|---|
-| `Yakıt Tüketimi` | → | `fuel_type = diesel` |
-| `Mazot Litre` | → | `amount = litre` |
-| `Tarih` | → | `date = invoice_date` |
-| `Araç Plaka` | → | `vehicle_id = plate` |
-| `Tedarikçi` | → | `supplier` |
-
----
-
-## 🏗️ Mimari
+### 🔄 Örnek Dönüşüm
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Frontend (Nginx)                      │
-│              Dark Mode SPA – Port 3000                    │
-└────────────────────┬────────────────────────────────────┘
-                     │ HTTP/WS
-┌────────────────────▼────────────────────────────────────┐
-│                  FastAPI Backend                          │
-│              Async REST API – Port 8000                   │
-│  /api/upload  /api/analytics  /health  /api/docs         │
-└──────┬──────────────────┬──────────────────┬────────────┘
-       │                  │                  │
-┌──────▼──────┐  ┌────────▼───────┐  ┌──────▼──────────┐
-│ PostgreSQL  │  │  Redis Broker  │  │  Gemini AI API  │
-│  Port 5432  │  │   Port 6379    │  │   (Google)      │
-└─────────────┘  └───────┬────────┘  └─────────────────┘
-                         │
-                ┌────────▼────────┐
-                │  Celery Worker  │
-                │ Background Jobs │
-                └────────┬────────┘
-                         │
-                ┌────────▼────────┐
-                │ Celery Flower   │
-                │  Monitoring     │
-                │   Port 5555     │
-                └─────────────────┘
+📄 KAYNAK DOSYA                    →   🗂️ STANDART MODEL
+─────────────────────────────────────────────────────────
+Yakıt Tüketimi: Mazot              →   fuel_type     = "diesel"
+Litre                              →   amount        = <sayı>
+Tarih                              →   date          = ISO format
+Araç Plaka                         →   vehicle_id    = "34ABC123"
+Tedarikçi Firma                    →   supplier      = <metin>
+Fatura Tutarı                      →   cost          = <sayı>
+─────────────────────────────────────────────────────────
+  emission_category = "mobile_combustion"  ← AI otomatik tespit etti
 ```
 
 ---
@@ -67,193 +45,417 @@ Firmalar farklı formatlarda veri tutar: kimisi "Mazot Litre", kimisi "Fuel Cons
 
 | Özellik | Açıklama |
 |---|---|
-| **Kolon Anlamlandırma** | Türkçe/İngilizce başlıkları otomatik tanır |
-| **Kategori Tahmini** | Emisyon türünü tespit eder (mobile_combustion, electricity...) |
-| **Eksik Alan Tespiti** | Hangi zorunlu alanların eksik olduğunu raporlar |
-| **Veri Kalite Kontrolü** | Her satır için güven skoru hesaplar |
-| **Hatalı Satır Raporu** | Hangi satırlarda sorun olduğunu açıklar |
-| **Fallback Heuristic** | AI erişilemezse kural tabanlı eşleştirme yapar |
+| 🧠 **Kolon Anlamlandırma** | Türkçe/İngilizce başlıkları otomatik tanır |
+| 🗂️ **Kategori Tahmini** | Emisyon türünü tespit eder (araç, elektrik, atık...) |
+| ❓ **Eksik Alan Tespiti** | Hangi zorunlu alanların eksik olduğunu raporlar |
+| ✅ **Veri Kalite Skoru** | Her dosya için 0–100 arası güven skoru |
+| ⚠️ **Hatalı Satır Raporu** | Hangi satırlarda sorun olduğunu açıklar |
+| 📝 **Otomatik Açıklama** | Her kayıt için insan okunabilir açıklama üretir |
+| 🔄 **Fallback Heuristic** | AI erişilemezse kural tabanlı eşleştirme yapar |
 
 ---
 
-## 🚀 Kurulum
+## 🏗️ Mimari
+
+```
+┌────────────────────────────────────────────────┐
+│           Frontend – Dark Mode SPA              │
+│         Drag & Drop · Real-time Progress        │
+│              http://localhost:3000              │
+└───────────────────┬────────────────────────────┘
+                    │ REST API
+┌───────────────────▼────────────────────────────┐
+│              FastAPI Backend                    │
+│    /api/upload  /api/analytics  /health         │
+│           http://localhost:8000                 │
+└──────┬────────────────┬───────────────┬─────────┘
+       │                │               │
+  ┌────▼────┐    ┌──────▼──────┐  ┌────▼──────────┐
+  │PostgreSQL│   │ Redis Broker │  │  Gemini AI    │
+  │  :5432  │   │    :6379     │  │   (Google)    │
+  └─────────┘   └──────┬───────┘  └───────────────┘
+                       │
+               ┌───────▼───────┐
+               │ Celery Worker │
+               │  Background   │
+               └───────┬───────┘
+                       │
+               ┌───────▼───────┐
+               │    Flower     │
+               │  Monitoring   │
+               │    :5555      │
+               └───────────────┘
+```
+
+---
+
+## 🚀 Kurulum (5 Dakikada Çalıştır)
 
 ### Ön Gereksinimler
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulu olması
-- Git
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) ✅
+- Git ✅
+- Gemini API Key ([buradan ücretsiz alın](https://aistudio.google.com/app/apikey)) ✅
 
-### 1. Repoyu Klonla
-
-```bash
-git clone https://github.com/YOUR_USERNAME/ai_erp.git
-cd ai_erp
-```
-
-### 2. Environment Dosyasını Hazırla
+### Adımlar
 
 ```bash
+# 1. Repoyu klonla
+git clone https://github.com/alabora33/ai_powered_erp.git
+cd ai_powered_erp
+
+# 2. Environment dosyasını hazırla
 cp .env.example .env
-# .env dosyasını düzenle:
-# GEMINI_API_KEY=your_key_here
 ```
 
-### 3. Docker ile Başlat
+`.env` dosyasını açıp şu satırı düzenle:
+```env
+GEMINI_API_KEY=senin_gemini_api_keyin_buraya
+```
 
 ```bash
+# 3. Tüm servisleri başlat
 docker compose up -d
+
+# 4. Logları izle (isteğe bağlı)
+docker compose logs -f api
 ```
 
-### 4. Uygulamaya Eriş
+### Erişim Noktaları
 
-| Servis | URL |
-|---|---|
-| 🌐 **Frontend** | http://localhost:3000 |
-| 📚 **API Docs** | http://localhost:8000/api/docs |
-| 🔍 **Redoc** | http://localhost:8000/api/redoc |
-| 🌸 **Flower** | http://localhost:5555 |
-| 💚 **Health** | http://localhost:8000/health |
+| Servis | URL | Açıklama |
+|---|---|---|
+| 🌐 **Frontend** | http://localhost:3000 | Ana uygulama |
+| 📚 **API Docs** | http://localhost:8000/api/docs | Swagger UI |
+| 📖 **Redoc** | http://localhost:8000/api/redoc | Alternatif API dokümantasyon |
+| 🌸 **Flower** | http://localhost:5555 | Celery task monitoring |
+| 💚 **Health** | http://localhost:8000/health | Sistem sağlık durumu |
 
 ---
 
 ## 📁 Proje Yapısı
 
 ```
-ai_erp/
-├── backend/
-│   ├── main.py           # FastAPI uygulama giriş noktası
-│   ├── config.py         # Pydantic Settings (env vars)
-│   ├── database.py       # Async SQLAlchemy engine
-│   ├── models.py         # ORM modelleri (UploadJob, MappedRecord)
-│   ├── schemas.py        # Pydantic request/response şemaları
-│   ├── ai_service.py     # Gemini AI entegrasyonu
-│   ├── data_processor.py # Excel/CSV okuma ve veri dönüşümü
-│   ├── celery_app.py     # Celery konfigürasyonu
-│   ├── tasks.py          # Async işleme görevleri
+ai_powered_erp/
+│
+├── 📂 backend/                    # FastAPI uygulaması
+│   ├── main.py                   # Giriş noktası, middleware, routing
+│   ├── config.py                 # Pydantic Settings (env vars)
+│   ├── database.py               # Async SQLAlchemy engine + session
+│   ├── models.py                 # ORM modelleri (UploadJob, MappedRecord)
+│   ├── schemas.py                # Pydantic request/response şemaları
+│   ├── ai_service.py             # ✨ Gemini AI entegrasyonu
+│   ├── data_processor.py         # Excel/CSV okuma + dönüşüm motoru
+│   ├── celery_app.py             # Celery yapılandırması
+│   ├── tasks.py                  # Async işleme görevleri (5 adım)
 │   └── routers/
-│       ├── upload.py     # Upload ve iş yönetimi endpoint'leri
-│       └── analytics.py  # Dashboard ve export endpoint'leri
-├── frontend/
-│   ├── index.html        # SPA HTML yapısı
-│   ├── styles.css        # Dark mode CSS (vanilla)
-│   └── app.js            # Uygulama mantığı
-├── docker-compose.yml    # Tüm servislerin orchestration'ı
-├── Dockerfile            # Python uygulama container'ı
-├── nginx.conf            # Nginx reverse proxy
-├── requirements.txt      # Python bağımlılıkları
-├── init.sql              # PostgreSQL başlangıç SQL
-├── .env                  # Environment değişkenleri (git'e eklenmez)
-└── .env.example          # Örnek env dosyası
+│       ├── upload.py             # Upload, job yönetimi endpoint'leri
+│       └── analytics.py          # Dashboard + CSV/JSON export
+│
+├── 📂 frontend/                   # Vanilla JS SPA (dark mode)
+│   ├── index.html                # HTML yapısı
+│   ├── styles.css                # Dark mode CSS + animasyonlar
+│   └── app.js                    # Uygulama mantığı + API çağrıları
+│
+├── 📂 .github/
+│   └── workflows/
+│       ├── ci.yml                # 🧪 Test + Lint + Docker build
+│       ├── cd.yml                # 🚀 Docker push + Release
+│       └── label.yml             # 🏷️ PR otomatik etiketleme
+│
+├── 📂 tests/
+│   ├── test_data_processor.py    # Data processor unit testleri
+│   └── test_api.py               # FastAPI integration testleri
+│
+├── docker-compose.yml            # Tüm servislerin orchestration'ı
+├── Dockerfile                    # Python uygulama container'ı
+├── nginx.conf                    # Reverse proxy + static files
+├── requirements.txt              # Python bağımlılıkları
+├── init.sql                      # PostgreSQL başlangıç şeması
+├── pyproject.toml                # Pytest + Ruff konfigürasyonu
+├── .env.example                  # Örnek environment dosyası
+└── README.md                     # Bu dosya
 ```
 
 ---
 
 ## 🔌 API Referansı
 
-### Upload
-
 ```bash
-# Dosya yükle
-POST /api/upload
-Content-Type: multipart/form-data
-Body: file=<your-file>
+# ── Dosya Yükleme ────────────────────────────────────────────
+POST   /api/upload                           # Dosya yükle → job_id al
+GET    /api/upload/jobs                      # Tüm işleri listele
+GET    /api/upload/jobs/{job_id}             # İş durumunu sorgula
+GET    /api/upload/jobs/{job_id}/records     # İşlenen kayıtları getir
+DELETE /api/upload/jobs/{job_id}             # İşi sil
 
-# İş durumu sorgula
-GET /api/upload/jobs/{job_id}
+# ── Analitik & Export ─────────────────────────────────────────
+GET    /api/analytics/dashboard              # Dashboard istatistikleri
+GET    /api/analytics/jobs/{job_id}/export/csv   # CSV export
+GET    /api/analytics/jobs/{job_id}/export/json  # JSON export
 
-# Tüm işleri listele
-GET /api/upload/jobs?limit=20&status=completed
-
-# İşin kayıtlarını getir (sayfalı)
-GET /api/upload/jobs/{job_id}/records?page=1&page_size=50
-
-# İşi sil
-DELETE /api/upload/jobs/{job_id}
+# ── Sistem ────────────────────────────────────────────────────
+GET    /health                               # Sağlık durumu
+GET    /api/docs                             # Swagger UI
 ```
 
-### Analytics & Export
+---
+
+## 🧪 Testleri Çalıştırma
 
 ```bash
-# Dashboard istatistikleri
-GET /api/analytics/dashboard
+# Docker container içinde
+docker compose exec api pytest tests/ -v
 
-# CSV export
-GET /api/analytics/jobs/{job_id}/export/csv
-
-# JSON export
-GET /api/analytics/jobs/{job_id}/export/json
+# Yerel (virtual env)
+pytest tests/ --cov=backend --cov-report=term-missing -v
 ```
 
 ---
 
 ## 🛠️ Geliştirme
 
-### Local Geliştirme (Docker olmadan)
-
 ```bash
-# Python environment
-python -m venv venv
-venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-
-# PostgreSQL ve Redis'in çalıştığından emin ol
-# .env dosyasını local değerlerle güncelle
-
-# API'yi başlat
-uvicorn backend.main:app --reload
-
-# Celery worker'ı başlat (ayrı terminal)
-celery -A backend.celery_app worker --loglevel=info
-```
-
-### Logları Görüntüle
-
-```bash
-docker compose logs -f api      # API logs
-docker compose logs -f worker   # Celery worker logs
-docker compose logs -f db       # PostgreSQL logs
-```
-
-### Servisi Yeniden Başlat
-
-```bash
+# Servisi yeniden başlat
 docker compose restart api
-docker compose restart worker
+
+# Logları izle
+docker compose logs -f api worker
+
+# Worker sayısını artır
+docker compose scale worker=3
+
+# Sıfırdan başlat (veriyi sil)
+docker compose down -v && docker compose up -d
 ```
 
 ---
 
-## 📊 Desteklenen Veri Tipleri
+## 📊 Desteklenen Emisyon Kategorileri
 
-| Emisyon Kategorisi | Açıklama |
+| Kategori | Açıklama | Örnek Kaynak Verisi |
+|---|---|---|
+| `mobile_combustion` | Araç yakıt tüketimi | Mazot, Benzin, Litre |
+| `stationary_combustion` | Sabit tesisler | Kazan, Jeneratör, Doğalgaz |
+| `electricity` | Elektrik tüketimi | kWh, Elektrik faturası |
+| `refrigerants` | Soğutucu gaz | Freon, R-22, R-134a |
+| `waste` | Atık yönetimi | Ton, m³, Atık miktarı |
+| `water` | Su tüketimi | m³, Su faturası |
+| `business_travel` | İş seyahatleri | Uçuş, km, Bilet |
+| `employee_commuting` | Çalışan ulaşım | Servis, km |
+
+---
+
+---
+
+# 🇬🇧 English
+
+## 🎯 What is AI ERP?
+
+**AI ERP** is a system that automatically analyzes Excel, CSV, and ERP export files using AI and converts them into a **standardized data model**.
+
+> It solves a real business problem: column headers like "Mazot Litre", "Fuel Consumption (L)", and "yakıt_lt" all get mapped to the same standard field — automatically.
+
+### 🔄 Example Transformation
+
+```
+📄 SOURCE FILE                     →   🗂️ STANDARD MODEL
+─────────────────────────────────────────────────────────
+Fuel Type: Mazot (Diesel)          →   fuel_type     = "diesel"
+Litre                              →   amount        = <number>
+Tarih (Date)                       →   date          = ISO format
+Araç Plaka (License Plate)         →   vehicle_id    = "34ABC123"
+Tedarikçi (Supplier)               →   supplier      = <text>
+Fatura Tutarı (Invoice Amount)     →   cost          = <number>
+─────────────────────────────────────────────────────────
+  emission_category = "mobile_combustion"  ← detected by AI
+```
+
+---
+
+## 🤖 AI Features
+
+| Feature | Description |
 |---|---|
-| `mobile_combustion` | Araç yakıt tüketimi |
-| `stationary_combustion` | Sabit tesisler (kazan, jeneratör) |
-| `electricity` | Elektrik tüketimi |
-| `refrigerants` | Soğutucu gaz kaçakları |
-| `waste` | Atık yönetimi |
-| `water` | Su tüketimi |
-| `business_travel` | İş seyahatleri |
-| `employee_commuting` | Çalışan ulaşım |
-| `purchased_goods` | Satın alınan mal/hizmet |
+| 🧠 **Column Understanding** | Detects Turkish & English headers automatically |
+| 🗂️ **Category Classification** | Identifies emission type (vehicle, electricity, waste...) |
+| ❓ **Missing Field Detection** | Reports which required fields are absent |
+| ✅ **Data Quality Scoring** | Assigns 0–100% confidence score per file |
+| ⚠️ **Error Row Reporting** | Explains which rows have issues and why |
+| 📝 **Auto Descriptions** | Generates human-readable descriptions for each record |
+| 🔄 **Heuristic Fallback** | Rule-based mapping when AI is unavailable |
 
 ---
 
-## 🔒 Güvenlik
+## 🚀 Quick Start (5 Minutes)
 
-- API anahtarı `.env` dosyasında saklanır, Git'e **eklenmez**
-- `.gitignore` ile hassas dosyalar korunur
-- Production'da `SECRET_KEY` mutlaka değiştirilmeli
-- CORS ayarları `ALLOWED_ORIGINS` ile kontrol edilir
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) ✅
+- Git ✅
+- Gemini API Key ([get one free](https://aistudio.google.com/app/apikey)) ✅
+
+### Steps
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/alabora33/ai_powered_erp.git
+cd ai_powered_erp
+
+# 2. Set up environment
+cp .env.example .env
+```
+
+Edit `.env` and add your API key:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+```bash
+# 3. Start all services
+docker compose up -d
+
+# 4. Watch logs (optional)
+docker compose logs -f api
+```
+
+### Access Points
+
+| Service | URL | Description |
+|---|---|---|
+| 🌐 **Frontend** | http://localhost:3000 | Main application |
+| 📚 **API Docs** | http://localhost:8000/api/docs | Swagger UI |
+| 📖 **Redoc** | http://localhost:8000/api/redoc | Alternative API docs |
+| 🌸 **Flower** | http://localhost:5555 | Celery task monitoring |
+| 💚 **Health** | http://localhost:8000/health | System health status |
 
 ---
 
-## 📄 Lisans
+## ⚙️ Technology Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Backend** | FastAPI + Python 3.12 | Async REST API |
+| **AI** | Google Gemini 1.5 Flash | Column analysis + structured output |
+| **Database** | PostgreSQL 16 | Persistent storage |
+| **Cache/Queue** | Redis 7 | Celery message broker |
+| **Task Queue** | Celery | Background file processing |
+| **Data** | Pandas + OpenPyXL | Excel/CSV reading |
+| **Validation** | Pydantic v2 | Schema enforcement |
+| **Monitoring** | Flower | Celery task dashboard |
+| **Frontend** | Vanilla HTML/CSS/JS | Dark mode SPA |
+| **Proxy** | Nginx | Static files + API proxy |
+| **Container** | Docker Compose | Full orchestration |
+| **CI/CD** | GitHub Actions | Automated testing + deployment |
+
+---
+
+## 🔌 API Reference
+
+```bash
+# ── File Upload ──────────────────────────────────────────────
+POST   /api/upload                           # Upload file → get job_id
+GET    /api/upload/jobs                      # List all jobs
+GET    /api/upload/jobs/{job_id}             # Poll job status & progress
+GET    /api/upload/jobs/{job_id}/records     # Get mapped records (paginated)
+DELETE /api/upload/jobs/{job_id}             # Delete job and records
+
+# ── Analytics & Export ───────────────────────────────────────
+GET    /api/analytics/dashboard              # Dashboard statistics
+GET    /api/analytics/jobs/{job_id}/export/csv   # Download as CSV
+GET    /api/analytics/jobs/{job_id}/export/json  # Download as JSON
+
+# ── System ───────────────────────────────────────────────────
+GET    /health                               # DB + Redis + AI health check
+GET    /api/docs                             # Swagger UI (interactive)
+GET    /api/redoc                            # ReDoc documentation
+```
+
+---
+
+## 🧪 Running Tests
+
+```bash
+# Inside Docker
+docker compose exec api pytest tests/ -v
+
+# Locally
+python -m venv venv
+venv\Scripts\activate          # Windows
+source venv/bin/activate        # Linux/Mac
+pip install -r requirements.txt
+pytest tests/ --cov=backend -v
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+```
+Push to main branch
+        │
+        ▼
+┌──────────────────────────────────┐
+│  CI Workflow (ci.yml)            │
+│  1. 🔍 Ruff Lint & Format check  │
+│  2. 🧪 Tests (Python 3.11+3.12) │
+│     └─ with PostgreSQL + Redis   │
+│  3. 🐳 Docker build validation   │
+│  4. 🔒 Security vulnerability    │
+│     scan (pip-audit)             │
+└──────────────┬───────────────────┘
+               │ All pass
+               ▼
+┌──────────────────────────────────┐
+│  CD Workflow (cd.yml)            │
+│  5. 🐳 Build & push to GHCR     │
+│  6. 📦 Create Release (on tag)  │
+└──────────────────────────────────┘
+```
+
+### Adding Gemini API Key as GitHub Secret
+
+1. Go to your repo → **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `GEMINI_API_KEY`
+4. Value: `your_api_key_here`
+
+---
+
+## 🗂️ Supported Emission Categories
+
+| Category | Description | Example Source Data |
+|---|---|---|
+| `mobile_combustion` | Vehicle fuel consumption | Diesel, Gasoline, Litre |
+| `stationary_combustion` | Fixed facilities | Boiler, Generator, Natural Gas |
+| `electricity` | Power consumption | kWh, Electricity bill |
+| `refrigerants` | Refrigerant gases | Freon, R-22, R-134a |
+| `waste` | Waste management | Ton, m³, Waste amount |
+| `water` | Water consumption | m³, Water bill |
+| `business_travel` | Business trips | Flights, km, Tickets |
+| `employee_commuting` | Employee transport | Shuttle, km |
+
+---
+
+## 🔒 Security Notes
+
+- The `.env` file is in `.gitignore` — your API key is **never committed**
+- Use `.env.example` as a template (it has no real secrets)
+- Change `SECRET_KEY` in production
+- Restrict `ALLOWED_ORIGINS` in production (not `*`)
+
+---
+
+## 📄 License
 
 MIT License © 2024 Ali Bora
 
 ---
 
 <div align="center">
-  <strong>Gemini AI</strong> · <strong>FastAPI</strong> · <strong>PostgreSQL</strong> · <strong>Celery</strong> · <strong>Docker</strong>
+
+Made with ❤️ using **Gemini AI** · **FastAPI** · **PostgreSQL** · **Celery** · **Docker**
+
+⭐ Star this repo if it helped you!
+
 </div>

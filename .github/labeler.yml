@@ -1,0 +1,41 @@
+backend/:
+  - label: "backend"
+    changed-files:
+      - any-glob-to-any-file: "backend/**"
+
+frontend/:
+  - label: "frontend"
+    changed-files:
+      - any-glob-to-any-file: "frontend/**"
+
+docker:
+  - label: "docker"
+    changed-files:
+      - any-glob-to-any-file:
+        - "Dockerfile"
+        - "docker-compose.yml"
+        - "nginx.conf"
+
+ci/cd:
+  - label: "ci/cd"
+    changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+tests:
+  - label: "tests"
+    changed-files:
+      - any-glob-to-any-file: "tests/**"
+
+dependencies:
+  - label: "dependencies"
+    changed-files:
+      - any-glob-to-any-file:
+        - "requirements.txt"
+        - "pyproject.toml"
+
+documentation:
+  - label: "documentation"
+    changed-files:
+      - any-glob-to-any-file:
+        - "*.md"
+        - "docs/**"
