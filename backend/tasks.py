@@ -16,7 +16,10 @@ def run_async(coro):
     """Run an async coroutine from a sync Celery task."""
     loop = asyncio.new_event_loop()
     try:
-        return loop.run_until_complete(coro)
+        result = loop.run_until_complete(coro)
+        from backend.database import engine
+        loop.run_until_complete(engine.dispose())
+        return result
     finally:
         loop.close()
 
