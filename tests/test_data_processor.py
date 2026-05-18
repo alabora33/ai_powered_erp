@@ -124,11 +124,9 @@ def test_apply_mappings_basic():
             source_column="Plaka", target_field="vehicle_id", confidence=0.85, sample_values=[]
         ),
     ]
-    record, errors = apply_mappings(row, mappings, "mobile_combustion", "diesel")
+    record, errors = apply_mappings(row, mappings)
     assert record["amount"] == 500.0
     assert record["vehicle_id"] == "34ABC123"
-    assert record["emission_category"] == "mobile_combustion"
-    assert record["fuel_type"] == "diesel"
     assert len(errors) == 0
 
 
@@ -139,8 +137,8 @@ def test_apply_mappings_invalid_amount():
             source_column="Miktar", target_field="amount", confidence=0.8, sample_values=[]
         )
     ]
-    record, errors = apply_mappings(row, mappings, "other", None)
-    assert record["amount"] is None
+    record, errors = apply_mappings(row, mappings)
+    assert "amount" not in record or record["amount"] is None
     assert len(errors) > 0
 
 
@@ -164,7 +162,5 @@ def test_process_dataframe():
             source_column="Plaka", target_field="vehicle_id", confidence=0.9, sample_values=[]
         ),
     ]
-    valid, errors = process_dataframe(df, mappings, "mobile_combustion", "diesel")
+    valid, errors = process_dataframe(df, mappings)
     assert len(valid) + len(errors) == 3
-    # All rows parsed (date and amount errors are soft warnings, not hard fails)
-    assert all(r["emission_category"] == "mobile_combustion" for r in valid + errors)
