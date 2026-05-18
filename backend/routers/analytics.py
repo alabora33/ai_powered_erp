@@ -44,27 +44,8 @@ async def get_dashboard(db: AsyncSession = Depends(get_db)):
     )
     avg_quality = avg_quality_result.scalar() or 0.0
 
-    # Categories breakdown
-    category_result = await db.execute(
-        select(
-            MappedRecord.emission_category,
-            func.count().label("count"),
-            func.coalesce(func.sum(MappedRecord.amount), 0).label("total_amount"),
-            func.coalesce(func.avg(MappedRecord.confidence_score), 0).label("avg_confidence"),
-        )
-        .where(MappedRecord.emission_category.isnot(None))
-        .group_by(MappedRecord.emission_category)
-        .order_by(desc("count"))
-    )
-    categories = [
-        CategorySummary(
-            emission_category=row.emission_category or "unknown",
-            count=row.count,
-            total_amount=float(row.total_amount or 0),
-            avg_confidence=float(row.avg_confidence or 0),
-        )
-        for row in category_result.fetchall()
-    ]
+    # Categories breakdown (Disabled for now as we transitioned to dynamic schemas)
+    categories = []
 
     # Recent jobs
     recent_result = await db.execute(
@@ -103,46 +84,24 @@ async def export_records_csv(
     writer = csv.writer(output)
 
     # Header
-    writer.writerow(
-        [
-            "row_number",
-            "emission_category",
-            "fuel_type",
-            "amount",
-            "unit",
-            "date",
-            "vehicle_id",
-            "description",
-            "supplier",
-            "cost",
-            "currency",
-            "location",
-            "is_valid",
-            "confidence_score",
-            "validation_errors",
-        ]
-    )
+    dynamic_headers = []
+    if records and records[0].extracted_data:
+        dynamic_headers = list(records[0].extracted_data.keys())
+
+    header = ["row_number"] + dynamic_headers + ["is_valid", "confidence_score", "validation_errors"]
+    writer.writerow(header)
 
     for rec in records:
-        writer.writerow(
-            [
-                rec.row_number,
-                rec.emission_category or "",
-                rec.fuel_type or "",
-                rec.amount or "",
-                rec.unit or "",
-                rec.date.isoformat() if rec.date else "",
-                rec.vehicle_id or "",
-                rec.description or "",
-                rec.supplier or "",
-                rec.cost or "",
-                rec.currency or "",
-                rec.location or "",
-                rec.is_valid,
-                rec.confidence_score or "",
-                "; ".join(rec.validation_errors) if rec.validation_errors else "",
-            ]
-        )
+        row = [rec.row_number]
+        for h in dynamic_headers:
+            row.append((rec.extracted_data or {}).get(h, ""))
+        
+        row.extend([
+            rec.is_valid,
+            rec.confidence_score or "",
+            "; ".join(rec.validation_errors) if rec.validation_errors else "",
+        ])
+        writer.writerow(row)
 
     output.seek(0)
     filename = f"ai_erp_export_{job_id[:8]}.csv"
@@ -177,17 +136,7 @@ async def export_records_json(
         "records": [
             {
                 "row_number": r.row_number,
-                "emission_category": r.emission_category,
-                "fuel_type": r.fuel_type,
-                "amount": r.amount,
-                "unit": r.unit,
-                "date": r.date.isoformat() if r.date else None,
-                "vehicle_id": r.vehicle_id,
-                "description": r.description,
-                "supplier": r.supplier,
-                "cost": r.cost,
-                "currency": r.currency,
-                "location": r.location,
+                **(r.extracted_data or {}),
                 "is_valid": r.is_valid,
                 "confidence_score": r.confidence_score,
                 "validation_errors": r.validation_errors,

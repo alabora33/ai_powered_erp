@@ -46,9 +46,10 @@ async def _process_upload_async(task, job_id: str) -> dict:
     from backend.database import AsyncSessionLocal
     from backend.models import MappedRecord, UploadJob
 
+    from sqlalchemy.orm import selectinload
     async with AsyncSessionLocal() as db:
         # 1. Fetch job from DB
-        result = await db.execute(select(UploadJob).where(UploadJob.id == job_id))
+        result = await db.execute(select(UploadJob).options(selectinload(UploadJob.template)).where(UploadJob.id == job_id))
         job = result.scalar_one_or_none()
 
         if not job:
@@ -76,20 +77,32 @@ async def _process_upload_async(task, job_id: str) -> dict:
             }
             await db.commit()
 
+            # Get Target Schema from template or fallback
+            if job.template:
+                target_schema = job.template.target_schema
+            else:
+                target_schema = [
+                    {"name": "date", "description": "Transaction date", "type": "date"},
+                    {"name": "description", "description": "Description of the item", "type": "string"},
+                    {"name": "amount", "description": "Quantity or amount", "type": "number"},
+                    {"name": "cost", "description": "Total cost or price", "type": "number"}
+                ]
+
             # 3. AI analysis
             logger.info("🤖 Running AI column analysis...")
             sample_data = get_sample_data(df, n=10)
             ai_result = await ai_service.analyze_columns(
                 columns=list(df.columns),
                 sample_data=sample_data,
+                target_schema=target_schema,
+                language=job.language,
             )
 
             job.progress = 40
             job.ai_summary = ai_result.ai_summary
             job.column_mappings = {
                 "mappings": [m.model_dump() for m in ai_result.detected_mappings],
-                "emission_category": ai_result.emission_category,
-                "fuel_type": ai_result.fuel_type,
+                "primary_category": ai_result.primary_category,
                 "missing_fields": ai_result.missing_fields,
                 "data_quality_issues": ai_result.data_quality_issues,
                 "recommendations": ai_result.recommendations,
@@ -102,8 +115,6 @@ async def _process_upload_async(task, job_id: str) -> dict:
             valid_records, error_records = process_dataframe(
                 df=df,
                 mappings=ai_result.detected_mappings,
-                default_category=ai_result.emission_category,
-                default_fuel_type=ai_result.fuel_type,
             )
             job.progress = 70
             await db.commit()
@@ -115,20 +126,19 @@ async def _process_upload_async(task, job_id: str) -> dict:
             for i in range(0, len(all_records), batch_size):
                 batch = all_records[i : i + batch_size]
                 for rec in batch:
+                    # Separate meta fields from mapped data
+                    meta_keys = ["row_number", "raw_data", "is_valid", "validation_errors"]
+                    extracted = {k: v for k, v in rec.items() if k not in meta_keys and v is not None}
+                    
+                    # Convert any date objects in extracted data to ISO strings for JSON serialization
+                    for k, v in extracted.items():
+                        if isinstance(v, datetime):
+                            extracted[k] = v.isoformat()
+                    
                     db_record = MappedRecord(
                         job_id=job_id,
                         row_number=rec["row_number"],
-                        emission_category=rec.get("emission_category"),
-                        fuel_type=rec.get("fuel_type"),
-                        amount=rec.get("amount"),
-                        unit=rec.get("unit"),
-                        date=rec.get("date"),
-                        vehicle_id=rec.get("vehicle_id"),
-                        description=rec.get("description"),
-                        supplier=rec.get("supplier"),
-                        cost=rec.get("cost"),
-                        currency=rec.get("currency"),
-                        location=rec.get("location"),
+                        extracted_data=extracted,
                         raw_data=rec.get("raw_data"),
                         is_valid=rec.get("is_valid", True),
                         validation_errors=rec.get("validation_errors"),

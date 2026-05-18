@@ -18,33 +18,65 @@ from backend.schemas import ColumnMapping
 
 
 def read_file(file_path: str) -> pd.DataFrame:
-    """Read Excel or CSV file into a DataFrame."""
+    """Read Excel or CSV file into a DataFrame, dynamically detecting the header row."""
     path = Path(file_path)
     ext = path.suffix.lower()
 
     if ext in (".xlsx", ".xlsm"):
-        df = pd.read_excel(file_path, engine="openpyxl", dtype=str)
+        df_raw = pd.read_excel(file_path, engine="openpyxl", dtype=str, header=None)
     elif ext == ".xls":
-        df = pd.read_excel(file_path, engine="xlrd", dtype=str)
+        df_raw = pd.read_excel(file_path, engine="xlrd", dtype=str, header=None)
     elif ext == ".csv":
-        # Try to detect encoding
         import chardet
-
         with open(file_path, "rb") as f:
             raw = f.read(10000)
         enc = chardet.detect(raw).get("encoding", "utf-8") or "utf-8"
         try:
-            df = pd.read_csv(file_path, dtype=str, encoding=enc)
+            df_raw = pd.read_csv(file_path, dtype=str, encoding=enc, header=None)
         except Exception:
-            df = pd.read_csv(file_path, dtype=str, encoding="latin-1")
+            df_raw = pd.read_csv(file_path, dtype=str, encoding="latin-1", header=None)
     else:
         raise ValueError(f"Unsupported file type: {ext}")
 
-    # Clean column names
-    df.columns = [str(c).strip() for c in df.columns]
     # Drop fully empty rows
-    df = df.dropna(how="all")
-    logger.info(f"📄 File loaded: {path.name} — {len(df)} rows, {len(df.columns)} columns")
+    df_raw = df_raw.dropna(how="all")
+
+    if len(df_raw) == 0:
+        return pd.DataFrame()
+
+    # Dynamic Header Detection: 
+    # Find the maximum number of non-null values in any row
+    row_counts = df_raw.notna().sum(axis=1)
+    max_count = row_counts.max()
+    
+    # The header is likely the first row that has >= 80% of max_count
+    header_idx = df_raw.index[0]
+    for idx, count in row_counts.items():
+        if count >= max_count * 0.8:
+            header_idx = idx
+            break
+
+    # Extract header and data
+    columns_raw = df_raw.loc[header_idx].fillna("Unnamed").astype(str).str.strip()
+    
+    # Ensure column names are unique
+    new_cols = []
+    seen = {}
+    for c in columns_raw:
+        if c in seen:
+            seen[c] += 1
+            new_cols.append(f"{c}_{seen[c]}")
+        else:
+            seen[c] = 0
+            new_cols.append(c)
+            
+    # Set data starting from the row after the header
+    int_idx = df_raw.index.get_loc(header_idx)
+    df = df_raw.iloc[int_idx + 1:].copy()
+    df.columns = new_cols
+    df = df.reset_index(drop=True)
+
+    logger.info(f"📄 File loaded: {path.name} — Header at row {header_idx}, {len(df)} rows, {len(df.columns)} columns")
     return df
 
 
@@ -156,26 +188,12 @@ def normalize_category(value: Any) -> str | None:
 def apply_mappings(
     row: dict,
     mappings: list[ColumnMapping],
-    default_category: str,
-    default_fuel_type: str | None,
 ) -> tuple[dict, list[str]]:
     """
-    Apply AI column mappings to a single row.
+    Apply AI column mappings to a single row based on dynamic schema.
     Returns (mapped_record_dict, validation_errors)
     """
-    record = {
-        "emission_category": default_category,
-        "fuel_type": default_fuel_type,
-        "amount": None,
-        "unit": None,
-        "date": None,
-        "vehicle_id": None,
-        "description": None,
-        "supplier": None,
-        "cost": None,
-        "currency": None,
-        "location": None,
-    }
+    record = {}
     errors = []
 
     for mapping in mappings:
@@ -187,21 +205,17 @@ def apply_mappings(
             continue
 
         try:
-            if target == "date":
-                record["date"] = parse_date(raw_value)
-                if record["date"] is None:
+            # Basic type inference based on target field name or AI transformation hint
+            target_lower = target.lower()
+            if "date" in target_lower or mapping.transformation == "date_parse":
+                record[target] = parse_date(raw_value)
+                if record[target] is None:
                     errors.append(f"Could not parse date: '{raw_value}' in column '{src_col}'")
-            elif target == "amount":
-                record["amount"] = parse_float(raw_value)
-                if record["amount"] is None:
-                    errors.append(f"Could not parse amount: '{raw_value}' in column '{src_col}'")
-            elif target == "cost":
-                record["cost"] = parse_float(raw_value)
-            elif target == "fuel_type":
-                record["fuel_type"] = normalize_fuel_type(raw_value) or default_fuel_type
-            elif target == "emission_category":
-                record["emission_category"] = normalize_category(raw_value) or default_category
-            elif target in record:
+            elif any(k in target_lower for k in ["amount", "cost", "price", "quantity", "tutar", "fiyat"]) or mapping.transformation == "numeric":
+                record[target] = parse_float(raw_value)
+                if record[target] is None:
+                    errors.append(f"Could not parse number: '{raw_value}' in column '{src_col}'")
+            else:
                 record[target] = str(raw_value).strip()
         except Exception as e:
             errors.append(f"Mapping error for '{src_col}' -> '{target}': {str(e)}")
@@ -215,11 +229,9 @@ def apply_mappings(
 def process_dataframe(
     df: pd.DataFrame,
     mappings: list[ColumnMapping],
-    default_category: str,
-    default_fuel_type: str | None,
 ) -> tuple[list[dict], list[dict]]:
     """
-    Process entire DataFrame with mappings.
+    Process entire DataFrame with dynamic mappings.
     Returns (valid_records, error_records)
     """
     valid_records = []
@@ -227,7 +239,7 @@ def process_dataframe(
 
     for idx, row in df.iterrows():
         row_dict = {col: row.get(col) for col in df.columns}
-        mapped, errors = apply_mappings(row_dict, mappings, default_category, default_fuel_type)
+        mapped, errors = apply_mappings(row_dict, mappings)
 
         record = {
             "row_number": int(idx) + 2,  # +2: 1-indexed + header row

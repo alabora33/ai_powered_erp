@@ -14,6 +14,7 @@ from loguru import logger
 from backend.config import settings
 from backend.database import check_db_connection, create_tables
 from backend.routers.analytics import router as analytics_router
+from backend.routers.templates import router as templates_router
 from backend.routers.upload import router as upload_router
 
 # ─── Lifespan ─────────────────────────────────────────────────────────────────
@@ -78,6 +79,7 @@ app.add_middleware(
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
 
+app.include_router(templates_router)
 app.include_router(upload_router)
 app.include_router(analytics_router)
 

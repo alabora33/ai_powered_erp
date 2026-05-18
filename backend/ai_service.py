@@ -17,50 +17,24 @@ genai.configure(api_key=settings.gemini_api_key)
 
 
 SYSTEM_PROMPT = """
-You are an expert data analyst specializing in ERP systems, environmental reporting, 
-and carbon footprint data. Your task is to analyze column headers and sample data 
-from uploaded Excel/CSV files and map them to a standard data model.
+You are an expert data analyst specializing in B2B data onboarding and system integrations.
+Your task is to analyze column headers and sample data from uploaded Excel/CSV files 
+and map them to the provided standard target schema dynamically.
 
-Standard target fields:
-- emission_category: Category of emission (mobile_combustion, stationary_combustion, 
-  electricity, refrigerants, waste, water, business_travel, employee_commuting, 
-  purchased_goods, other)
-- fuel_type: Type of fuel (diesel, gasoline, lpg, natural_gas, coal, electricity, other)
-- amount: Numeric quantity/volume consumed
-- unit: Unit of measurement (litre, kg, kWh, ton, m3, km, piece, etc.)
-- date: Date of the transaction/record (map to invoice_date, transaction_date, etc.)
-- vehicle_id: Vehicle identifier (license plate, fleet number, etc.)
-- description: Description or notes
-- supplier: Supplier/vendor name
-- cost: Financial cost/price
-- currency: Currency code (TRY, USD, EUR, etc.)
-- location: Location/site of the activity
-
-Analyze Turkish AND English column names. Common Turkish terms:
-- "Mazot/Motorin" = diesel fuel
-- "Benzin" = gasoline
-- "Litre/lt" = litre
-- "Tarih" = date
-- "Plaka" = vehicle license plate
-- "Araç" = vehicle
-- "Tedarikçi/Tedarikçi" = supplier
-- "Tutar/Miktar" = amount
-- "Birim" = unit
-- "Yakıt" = fuel
-- "Tüketim" = consumption
-- "Fatura" = invoice
-- "Açıklama" = description
+IMPORTANT: All human-readable text you generate (such as 'notes', 'primary_category', 'data_quality_issues', 'ai_summary', and 'recommendations') MUST BE STRICTLY IN {language}. Do not write explanations in any other language.
 
 Always respond with valid JSON only, no markdown code blocks.
 """
 
 ANALYSIS_PROMPT_TEMPLATE = """
 Analyze the following Excel/CSV file columns and sample data.
-Map each column to the standard field schema and identify:
+Map each column to the TARGET SCHEMA and identify:
 1. What type of data this file contains
-2. The emission category
-3. Missing required fields
-4. Data quality issues
+2. Missing required fields from the target schema
+3. Data quality issues
+
+TARGET SCHEMA:
+{target_schema_json}
 
 File columns and sample values:
 {columns_json}
@@ -70,16 +44,15 @@ Respond with this exact JSON structure:
   "detected_mappings": [
     {{
       "source_column": "original column name",
-      "target_field": "standard_field_name",
+      "target_field": "field_name_from_target_schema",
       "confidence": 0.95,
       "transformation": "lowercase | date_parse | numeric | none",
       "sample_values": ["val1", "val2"],
       "notes": "reason for mapping"
     }}
   ],
-  "emission_category": "mobile_combustion",
-  "fuel_type": "diesel",
-  "missing_fields": ["field1", "field2"],
+  "primary_category": "A general category describing the uploaded data (e.g., E-commerce, HR, Finance)",
+  "missing_fields": ["field1_from_target_schema", "field2"],
   "data_quality_issues": ["issue description"],
   "ai_summary": "Human-readable summary of what this data contains and how it was mapped",
   "confidence_overall": 0.88,
@@ -105,10 +78,12 @@ class AIService:
         self,
         columns: list[str],
         sample_data: dict[str, list],
+        target_schema: list | dict,
+        language: str = "tr",
     ) -> AIAnalysisResult:
         """
         Analyze columns and sample data using Gemini AI.
-        Returns structured mapping result.
+        Returns structured mapping result based on dynamic target schema.
         """
         columns_info = {}
         for col in columns:
@@ -118,12 +93,17 @@ class AIService:
             columns_info[col] = clean_samples
 
         prompt = ANALYSIS_PROMPT_TEMPLATE.format(
+            target_schema_json=json.dumps(target_schema, ensure_ascii=False, indent=2),
             columns_json=json.dumps(columns_info, ensure_ascii=False, indent=2)
         )
 
         try:
-            logger.info(f"Sending {len(columns)} columns to Gemini for analysis...")
-            response = self.model.generate_content([SYSTEM_PROMPT, prompt])
+            logger.info(f"Sending {len(columns)} columns to Gemini for analysis (lang={language})...")
+            
+            lang_name = "Turkish" if language == "tr" else "English"
+            sys_prompt = SYSTEM_PROMPT.format(language=lang_name)
+            
+            response = self.model.generate_content([sys_prompt, prompt])
             raw_text = response.text.strip()
 
             # Strip markdown code blocks if present
@@ -134,7 +114,7 @@ class AIService:
             data = json.loads(raw_text)
             result = AIAnalysisResult(**data)
             logger.info(
-                f"✅ AI analysis complete. Category: {result.emission_category}, "
+                f"✅ AI analysis complete. Category: {result.primary_category}, "
                 f"Confidence: {result.confidence_overall:.2%}"
             )
             return result
@@ -149,60 +129,28 @@ class AIService:
     def _fallback_analysis(
         self, columns: list[str], sample_data: dict[str, list]
     ) -> AIAnalysisResult:
-        """Heuristic-based fallback when AI fails."""
-        logger.warning("Using heuristic fallback analysis...")
+        """Generic fallback when AI fails."""
+        logger.warning("Using generic fallback analysis...")
         mappings = []
 
-        keyword_map = {
-            # Date keywords
-            ("tarih", "date", "tarih", "invoice_date", "transaction_date"): "date",
-            # Amount keywords
-            ("litre", "lt", "liters", "miktar", "tutar", "amount", "quantity", "tüketim"): "amount",
-            # Fuel type keywords
-            ("yakıt", "fuel", "mazot", "motorin", "benzin", "diesel", "gasoline"): "fuel_type",
-            # Vehicle keywords
-            ("plaka", "plate", "araç", "vehicle", "fleet"): "vehicle_id",
-            # Supplier keywords
-            ("tedarikçi", "supplier", "vendor", "firma"): "supplier",
-            # Cost keywords
-            ("tutar", "fiyat", "cost", "price", "ücret", "bedel"): "cost",
-            # Description keywords
-            ("açıklama", "description", "notes", "not", "aciklama"): "description",
-            # Location keywords
-            ("konum", "lokasyon", "location", "adres", "site"): "location",
-            # Unit keywords
-            ("birim", "unit", "ölçü"): "unit",
-        }
-
         for col in columns:
-            col_lower = col.lower().strip()
-            target = "description"  # default
-            confidence = 0.5
-
-            for keywords, field in keyword_map.items():
-                if any(kw in col_lower for kw in keywords):
-                    target = field
-                    confidence = 0.7
-                    break
-
             mappings.append(
                 ColumnMapping(
                     source_column=col,
-                    target_field=target,
-                    confidence=confidence,
+                    target_field=col.lower().replace(" ", "_"),
+                    confidence=0.5,
                     transformation="none",
                     sample_values=sample_data.get(col, [])[:3],
-                    notes="Heuristic mapping (AI unavailable)",
+                    notes="Generic mapping (AI unavailable)",
                 )
             )
 
         return AIAnalysisResult(
             detected_mappings=mappings,
-            emission_category="mobile_combustion",
-            fuel_type="diesel",
+            primary_category="Unknown",
             missing_fields=[],
-            data_quality_issues=["AI analysis unavailable – heuristic mapping applied"],
-            ai_summary="Heuristic analysis applied due to AI service unavailability.",
+            data_quality_issues=["AI analysis unavailable – generic mapping applied"],
+            ai_summary="Fallback generic analysis applied due to AI service error.",
             confidence_overall=0.5,
             recommendations=["Please review mappings manually"],
         )
@@ -210,13 +158,14 @@ class AIService:
     async def generate_record_description(
         self,
         record_data: dict,
-        emission_category: str,
+        primary_category: str | None,
     ) -> str:
         """Generate a human-readable description for a mapped record."""
         try:
+            category = primary_category or "Data"
             prompt = f"""
-Generate a concise one-sentence description (max 100 chars) for this emission record:
-Category: {emission_category}
+Generate a concise one-sentence description (max 100 chars) for this record:
+Category: {category}
 Data: {json.dumps(record_data, ensure_ascii=False)}
 Respond with only the description text, no quotes.
 """
@@ -224,7 +173,7 @@ Respond with only the description text, no quotes.
             return response.text.strip()[:200]
         except Exception as e:
             logger.warning(f"Failed to generate record description: {e}")
-            return f"{emission_category} record"
+            return f"Record item"
 
     async def validate_data_quality(
         self,

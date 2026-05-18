@@ -26,6 +26,8 @@ router = APIRouter(prefix="/api/upload", tags=["Upload & Processing"])
 
 @router.post("", response_model=UploadResponse)
 async def upload_file(
+    template_id: str | None = None,
+    language: str = "tr",
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
 ):
@@ -64,6 +66,8 @@ async def upload_file(
             file_size=len(content),
             file_type=ext.lstrip("."),
             status="pending",
+            template_id=template_id,
+            language=language,
         )
         db.add(job)
         await db.flush()  # Get the ID

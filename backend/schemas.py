@@ -7,6 +7,18 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+# ─── Template Schemas ──────────────────────────────────────────────────────────
+
+class MappingTemplateCreate(BaseModel):
+    name: str
+    description: str | None = None
+    target_schema: list | dict
+
+class MappingTemplateOut(MappingTemplateCreate):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    created_at: datetime
+
 # ─── Column Mapping Schemas ───────────────────────────────────────────────────
 
 
@@ -27,8 +39,7 @@ class AIAnalysisResult(BaseModel):
     """Full AI analysis of uploaded file columns."""
 
     detected_mappings: list[ColumnMapping]
-    emission_category: str
-    fuel_type: str | None = None
+    primary_category: str | None = Field(None, description="General category of the data")
     missing_fields: list[str] = Field(default_factory=list)
     data_quality_issues: list[str] = Field(default_factory=list)
     ai_summary: str
@@ -94,17 +105,7 @@ class MappedRecordOut(BaseModel):
 
     id: str
     row_number: int
-    emission_category: str | None = None
-    fuel_type: str | None = None
-    amount: float | None = None
-    unit: str | None = None
-    date: datetime | None = None
-    vehicle_id: str | None = None
-    description: str | None = None
-    supplier: str | None = None
-    cost: float | None = None
-    currency: str | None = None
-    location: str | None = None
+    extracted_data: dict
     raw_data: dict | None = None
     is_valid: bool
     validation_errors: list | None = None

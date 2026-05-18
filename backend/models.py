@@ -17,6 +17,25 @@ def gen_uuid() -> str:
     return str(uuid.uuid4())
 
 
+# ─── Mapping Template ───────────────────────────────────────────────────────────
+
+class MappingTemplate(Base):
+    """Dynamic schema template for mapping various domains (E-commerce, HR, etc.)."""
+
+    __tablename__ = "mapping_templates"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
+    # JSON schema definition for the target structure
+    # Example: [{"name": "price", "type": "number", "description": "Item price"}]
+    target_schema: Mapped[list | dict] = mapped_column(JSON, nullable=False)
+    
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 # ─── Upload Job ───────────────────────────────────────────────────────────────
 
 
@@ -48,6 +67,13 @@ class UploadJob(Base):
 
     # Celery task ID
     task_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Dynamic Template Mapping
+    template_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("mapping_templates.id", ondelete="SET NULL"), nullable=True
+    )
+    language: Mapped[str] = mapped_column(String(10), default="tr", nullable=False)
+    template: Mapped["MappingTemplate"] = relationship("MappingTemplate")
 
     # AI analysis results
     detected_columns: Mapped[dict | None] = mapped_column(JSON, nullable=True)
@@ -91,18 +117,9 @@ class MappedRecord(Base):
     )
     row_number: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Standard mapped fields
-    emission_category: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    fuel_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    amount: Mapped[float | None] = mapped_column(Float, nullable=True)
-    unit: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    vehicle_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    supplier: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    cost: Mapped[float | None] = mapped_column(Float, nullable=True)
-    currency: Mapped[str | None] = mapped_column(String(10), nullable=True)
-    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Dynamic Universal Data Column
+    # Replaces all hardcoded fields (amount, fuel_type, etc.)
+    extracted_data: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 
     # Original raw data preserved
     raw_data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
