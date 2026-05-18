@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=6366f1&height=200&section=header&text=AI%20ERP&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI-Powered%20Excel%20%2F%20ERP%20Data%20Mapping%20System&descAlignY=55&descAlign=50" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=6366f1&height=200&section=header&text=AI%20ERP&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=AI-Powered%20SaaS%20Data%20Mapping%20%26%20Integration%20Platform&descAlignY=55&descAlign=50" width="100%"/>
 
 [![CI](https://github.com/alabora33/ai_powered_erp/actions/workflows/ci.yml/badge.svg)](https://github.com/alabora33/ai_powered_erp/actions/workflows/ci.yml)
 [![CD](https://github.com/alabora33/ai_powered_erp/actions/workflows/cd.yml/badge.svg)](https://github.com/alabora33/ai_powered_erp/actions/workflows/cd.yml)
@@ -20,38 +20,37 @@
 
 ## 🎯 Proje Nedir?
 
-**AI ERP**, şirketlerin farklı formatlarda tuttuğu Excel, CSV ve ERP çıktı dosyalarını yapay zeka ile **otomatik olarak analiz eden** ve **standart bir veri modeline dönüştüren** bir sistemdir.
+**AI ERP**, şirketlerin karmaşık Excel, CSV ve ERP çıktı dosyalarını yapay zeka gücüyle **otomatik olarak analiz eden**, yapılandırılmamış verileri okuyup belirlediğiniz **şablonlara (JSON/DB)** dinamik olarak dönüştüren tam kapsamlı bir **SaaS (Hizmet Olarak Yazılım)** platformudur.
 
-> Gerçek bir iş problemini çözüyor: "Mazot Litre", "Fuel Consumption (L)", "yakıt_lt" gibi farklı başlıkları AI tek bir standarda indirgüyor.
+> İnsan eli değmeden, "Tutar", "Price", "Miktar (Litre)" gibi karmaşık başlıkları sistemin tek bir standardına dönüştürür. Ayrıca **Banka Ekstreleri** gibi başında 10-15 satır çöp veri bulunan dosyaların başlık satırını yapay zeka ile dinamik olarak tespit eder!
 
-### 🔄 Örnek Dönüşüm
+### 🔄 Nasıl Çalışır?
+
+Kullanıcı bir dosya yükler ve hedeflediği "Şablonu" seçer (Örn: Banka Ekstresi, İK Maaş Tablosu). AI dosyayı okur, başlıkları tahmin eder, dönüşümleri yapar ve veritabanına standart formatta kaydeder.
 
 ```
-📄 KAYNAK DOSYA                    →   🗂️ STANDART MODEL
-─────────────────────────────────────────────────────────
-Yakıt Tüketimi: Mazot              →   fuel_type     = "diesel"
-Litre                              →   amount        = <sayı>
-Tarih                              →   date          = ISO format
-Araç Plaka                         →   vehicle_id    = "34ABC123"
-Tedarikçi Firma                    →   supplier      = <metin>
-Fatura Tutarı                      →   cost          = <sayı>
-─────────────────────────────────────────────────────────
-  emission_category = "mobile_combustion"  ← AI otomatik tespit etti
+📄 KARMAŞIK KAYNAK DOSYA             →   🗂️ SEÇİLEN STANDART ŞABLON (Örn: Banka Ekstresi)
+────────────────────────────────────────────────────────────────────────────
+Garanti BBVA Ekstresi                →   (Atlanır - Çöp Veri)
+TR3300... Numaralı Hesap             →   (Atlanır - Çöp Veri)
+Dekont No                            →   id            = <string>
+İşlem Zamanı                         →   islem_tarihi  = ISO Format (Date)
+Kime / Açıklama                      →   aciklama      = <string>
+Giren / Çıkan Tutar                  →   tutar         = <sayı>
+────────────────────────────────────────────────────────────────────────────
 ```
 
 ---
 
-## 🤖 AI Özellikleri
+## ✨ Öne Çıkan SaaS Özellikleri
 
 | Özellik | Açıklama |
 |---|---|
-| 🧠 **Kolon Anlamlandırma** | Türkçe/İngilizce başlıkları otomatik tanır |
-| 🗂️ **Kategori Tahmini** | Emisyon türünü tespit eder (araç, elektrik, atık...) |
-| ❓ **Eksik Alan Tespiti** | Hangi zorunlu alanların eksik olduğunu raporlar |
-| ✅ **Veri Kalite Skoru** | Her dosya için 0–100 arası güven skoru |
-| ⚠️ **Hatalı Satır Raporu** | Hangi satırlarda sorun olduğunu açıklar |
-| 📝 **Otomatik Açıklama** | Her kayıt için insan okunabilir açıklama üretir |
-| 🔄 **Fallback Heuristic** | AI erişilemezse kural tabanlı eşleştirme yapar |
+| 🌍 **Tam i18n Desteği** | Kullanıcı arayüzü ve AI raporları tek tıkla **Türkçe / İngilizce** değişir |
+| 🗂️ **Dinamik Şablonlar** | E-Ticaret, İK, Bankacılık ve Yakıt tüketimi için dinamik Mapping yeteneği |
+| 🧠 **Akıllı Başlık Tespiti** | Dosya başındaki gereksiz logoları ve bilgileri atlayıp asıl veriyi bulur |
+| ✅ **Veri Kalite Kontrolü** | AI her satırı kontrol eder, hatalı ve eksik verileri size raporlar |
+| 💬 **AI Durum Özeti** | Yapılan işlemi insancıl bir dille özetler ("Bu dosya lojistik firmasına aittir...") |
 
 ---
 
@@ -60,13 +59,13 @@ Fatura Tutarı                      →   cost          = <sayı>
 ```
 ┌────────────────────────────────────────────────┐
 │           Frontend – Dark Mode SPA              │
-│         Drag & Drop · Real-time Progress        │
+│       Drag & Drop · Real-time Translation       │
 │              http://localhost:3000              │
 └───────────────────┬────────────────────────────┘
                     │ REST API
 ┌───────────────────▼────────────────────────────┐
 │              FastAPI Backend                    │
-│    /api/upload  /api/analytics  /health         │
+│    /api/upload  /api/templates  /api/analytics  │
 │           http://localhost:8000                 │
 └──────┬────────────────┬───────────────┬─────────┘
        │                │               │
@@ -78,12 +77,6 @@ Fatura Tutarı                      →   cost          = <sayı>
                ┌───────▼───────┐
                │ Celery Worker │
                │  Background   │
-               └───────┬───────┘
-                       │
-               ┌───────▼───────┐
-               │    Flower     │
-               │  Monitoring   │
-               │    :5555      │
                └───────────────┘
 ```
 
@@ -129,120 +122,6 @@ docker compose logs -f api
 | 📚 **API Docs** | http://localhost:8000/api/docs | Swagger UI |
 | 📖 **Redoc** | http://localhost:8000/api/redoc | Alternatif API dokümantasyon |
 | 🌸 **Flower** | http://localhost:5555 | Celery task monitoring |
-| 💚 **Health** | http://localhost:8000/health | Sistem sağlık durumu |
-
----
-
-## 📁 Proje Yapısı
-
-```
-ai_powered_erp/
-│
-├── 📂 backend/                    # FastAPI uygulaması
-│   ├── main.py                   # Giriş noktası, middleware, routing
-│   ├── config.py                 # Pydantic Settings (env vars)
-│   ├── database.py               # Async SQLAlchemy engine + session
-│   ├── models.py                 # ORM modelleri (UploadJob, MappedRecord)
-│   ├── schemas.py                # Pydantic request/response şemaları
-│   ├── ai_service.py             # ✨ Gemini AI entegrasyonu
-│   ├── data_processor.py         # Excel/CSV okuma + dönüşüm motoru
-│   ├── celery_app.py             # Celery yapılandırması
-│   ├── tasks.py                  # Async işleme görevleri (5 adım)
-│   └── routers/
-│       ├── upload.py             # Upload, job yönetimi endpoint'leri
-│       └── analytics.py          # Dashboard + CSV/JSON export
-│
-├── 📂 frontend/                   # Vanilla JS SPA (dark mode)
-│   ├── index.html                # HTML yapısı
-│   ├── styles.css                # Dark mode CSS + animasyonlar
-│   └── app.js                    # Uygulama mantığı + API çağrıları
-│
-├── 📂 .github/
-│   └── workflows/
-│       ├── ci.yml                # 🧪 Test + Lint + Docker build
-│       ├── cd.yml                # 🚀 Docker push + Release
-│       └── label.yml             # 🏷️ PR otomatik etiketleme
-│
-├── 📂 tests/
-│   ├── test_data_processor.py    # Data processor unit testleri
-│   └── test_api.py               # FastAPI integration testleri
-│
-├── docker-compose.yml            # Tüm servislerin orchestration'ı
-├── Dockerfile                    # Python uygulama container'ı
-├── nginx.conf                    # Reverse proxy + static files
-├── requirements.txt              # Python bağımlılıkları
-├── init.sql                      # PostgreSQL başlangıç şeması
-├── pyproject.toml                # Pytest + Ruff konfigürasyonu
-├── .env.example                  # Örnek environment dosyası
-└── README.md                     # Bu dosya
-```
-
----
-
-## 🔌 API Referansı
-
-```bash
-# ── Dosya Yükleme ────────────────────────────────────────────
-POST   /api/upload                           # Dosya yükle → job_id al
-GET    /api/upload/jobs                      # Tüm işleri listele
-GET    /api/upload/jobs/{job_id}             # İş durumunu sorgula
-GET    /api/upload/jobs/{job_id}/records     # İşlenen kayıtları getir
-DELETE /api/upload/jobs/{job_id}             # İşi sil
-
-# ── Analitik & Export ─────────────────────────────────────────
-GET    /api/analytics/dashboard              # Dashboard istatistikleri
-GET    /api/analytics/jobs/{job_id}/export/csv   # CSV export
-GET    /api/analytics/jobs/{job_id}/export/json  # JSON export
-
-# ── Sistem ────────────────────────────────────────────────────
-GET    /health                               # Sağlık durumu
-GET    /api/docs                             # Swagger UI
-```
-
----
-
-## 🧪 Testleri Çalıştırma
-
-```bash
-# Docker container içinde
-docker compose exec api pytest tests/ -v
-
-# Yerel (virtual env)
-pytest tests/ --cov=backend --cov-report=term-missing -v
-```
-
----
-
-## 🛠️ Geliştirme
-
-```bash
-# Servisi yeniden başlat
-docker compose restart api
-
-# Logları izle
-docker compose logs -f api worker
-
-# Worker sayısını artır
-docker compose scale worker=3
-
-# Sıfırdan başlat (veriyi sil)
-docker compose down -v && docker compose up -d
-```
-
----
-
-## 📊 Desteklenen Emisyon Kategorileri
-
-| Kategori | Açıklama | Örnek Kaynak Verisi |
-|---|---|---|
-| `mobile_combustion` | Araç yakıt tüketimi | Mazot, Benzin, Litre |
-| `stationary_combustion` | Sabit tesisler | Kazan, Jeneratör, Doğalgaz |
-| `electricity` | Elektrik tüketimi | kWh, Elektrik faturası |
-| `refrigerants` | Soğutucu gaz | Freon, R-22, R-134a |
-| `waste` | Atık yönetimi | Ton, m³, Atık miktarı |
-| `water` | Su tüketimi | m³, Su faturası |
-| `business_travel` | İş seyahatleri | Uçuş, km, Bilet |
-| `employee_commuting` | Çalışan ulaşım | Servis, km |
 
 ---
 
@@ -252,38 +131,37 @@ docker compose down -v && docker compose up -d
 
 ## 🎯 What is AI ERP?
 
-**AI ERP** is a system that automatically analyzes Excel, CSV, and ERP export files using AI and converts them into a **standardized data model**.
+**AI ERP** is a comprehensive **SaaS (Software as a Service)** platform that leverages artificial intelligence to **automatically analyze** complex Excel, CSV, and ERP export files, mapping unstructured data dynamically into your defined **templates (JSON/DB)**.
 
-> It solves a real business problem: column headers like "Mazot Litre", "Fuel Consumption (L)", and "yakıt_lt" all get mapped to the same standard field — automatically.
+> Completely hands-free, it converts messy column headers like "Price", "Amount (Liter)", or "Tutar" into a single, standardized schema. It even features **Dynamic Header Detection** to intelligently skip metadata, logos, and garbage rows found at the top of files like **Bank Statements**!
 
-### 🔄 Example Transformation
+### 🔄 How it Works
+
+The user uploads a file and selects a target "Template" (e.g., Bank Statement, HR Salary Table). The AI reads the file, guesses the real table headers, performs the transformations, and saves the records to the database in a standard format.
 
 ```
-📄 SOURCE FILE                     →   🗂️ STANDARD MODEL
-─────────────────────────────────────────────────────────
-Fuel Type: Mazot (Diesel)          →   fuel_type     = "diesel"
-Litre                              →   amount        = <number>
-Tarih (Date)                       →   date          = ISO format
-Araç Plaka (License Plate)         →   vehicle_id    = "34ABC123"
-Tedarikçi (Supplier)               →   supplier      = <text>
-Fatura Tutarı (Invoice Amount)     →   cost          = <number>
-─────────────────────────────────────────────────────────
-  emission_category = "mobile_combustion"  ← detected by AI
+📄 MESSY SOURCE FILE                 →   🗂️ TARGET TEMPLATE (e.g., Bank Statement)
+────────────────────────────────────────────────────────────────────────────
+Global Bank Statement                →   (Skipped - Garbage data)
+Account No: TR3300...                →   (Skipped - Garbage data)
+Transaction ID                       →   id            = <string>
+Time of Tx                           →   transaction_date = ISO Format (Date)
+Recipient / Note                     →   description   = <string>
+Incoming / Outgoing                  →   amount        = <number>
+────────────────────────────────────────────────────────────────────────────
 ```
 
 ---
 
-## 🤖 AI Features
+## ✨ Key SaaS Features
 
 | Feature | Description |
 |---|---|
-| 🧠 **Column Understanding** | Detects Turkish & English headers automatically |
-| 🗂️ **Category Classification** | Identifies emission type (vehicle, electricity, waste...) |
-| ❓ **Missing Field Detection** | Reports which required fields are absent |
-| ✅ **Data Quality Scoring** | Assigns 0–100% confidence score per file |
-| ⚠️ **Error Row Reporting** | Explains which rows have issues and why |
-| 📝 **Auto Descriptions** | Generates human-readable descriptions for each record |
-| 🔄 **Heuristic Fallback** | Rule-based mapping when AI is unavailable |
+| 🌍 **Full i18n Support** | The UI, Data Tables, and even the AI-generated summaries switch between **Turkish & English** instantly |
+| 🗂️ **Dynamic Templates** | Out-of-the-box mappings for E-Commerce, HR, Banking, and Fuel Consumption domains |
+| 🧠 **Smart Header Detection** | Skips preliminary garbage rows and accurately locates where the actual data table begins |
+| ✅ **Data Quality Control** | The AI parses every row, reporting errors, invalid values, and missing fields dynamically |
+| 💬 **AI Insights** | Provides a human-readable summary of the file ("This file belongs to a logistics firm...") |
 
 ---
 
@@ -325,115 +203,7 @@ docker compose logs -f api
 |---|---|---|
 | 🌐 **Frontend** | http://localhost:3000 | Main application |
 | 📚 **API Docs** | http://localhost:8000/api/docs | Swagger UI |
-| 📖 **Redoc** | http://localhost:8000/api/redoc | Alternative API docs |
 | 🌸 **Flower** | http://localhost:5555 | Celery task monitoring |
-| 💚 **Health** | http://localhost:8000/health | System health status |
-
----
-
-## ⚙️ Technology Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| **Backend** | FastAPI + Python 3.12 | Async REST API |
-| **AI** | Google Gemini 1.5 Flash | Column analysis + structured output |
-| **Database** | PostgreSQL 16 | Persistent storage |
-| **Cache/Queue** | Redis 7 | Celery message broker |
-| **Task Queue** | Celery | Background file processing |
-| **Data** | Pandas + OpenPyXL | Excel/CSV reading |
-| **Validation** | Pydantic v2 | Schema enforcement |
-| **Monitoring** | Flower | Celery task dashboard |
-| **Frontend** | Vanilla HTML/CSS/JS | Dark mode SPA |
-| **Proxy** | Nginx | Static files + API proxy |
-| **Container** | Docker Compose | Full orchestration |
-| **CI/CD** | GitHub Actions | Automated testing + deployment |
-
----
-
-## 🔌 API Reference
-
-```bash
-# ── File Upload ──────────────────────────────────────────────
-POST   /api/upload                           # Upload file → get job_id
-GET    /api/upload/jobs                      # List all jobs
-GET    /api/upload/jobs/{job_id}             # Poll job status & progress
-GET    /api/upload/jobs/{job_id}/records     # Get mapped records (paginated)
-DELETE /api/upload/jobs/{job_id}             # Delete job and records
-
-# ── Analytics & Export ───────────────────────────────────────
-GET    /api/analytics/dashboard              # Dashboard statistics
-GET    /api/analytics/jobs/{job_id}/export/csv   # Download as CSV
-GET    /api/analytics/jobs/{job_id}/export/json  # Download as JSON
-
-# ── System ───────────────────────────────────────────────────
-GET    /health                               # DB + Redis + AI health check
-GET    /api/docs                             # Swagger UI (interactive)
-GET    /api/redoc                            # ReDoc documentation
-```
-
----
-
-## 🧪 Running Tests
-
-```bash
-# Inside Docker
-docker compose exec api pytest tests/ -v
-
-# Locally
-python -m venv venv
-venv\Scripts\activate          # Windows
-source venv/bin/activate        # Linux/Mac
-pip install -r requirements.txt
-pytest tests/ --cov=backend -v
-```
-
----
-
-## 🔄 CI/CD Pipeline
-
-```
-Push to main branch
-        │
-        ▼
-┌──────────────────────────────────┐
-│  CI Workflow (ci.yml)            │
-│  1. 🔍 Ruff Lint & Format check  │
-│  2. 🧪 Tests (Python 3.11+3.12) │
-│     └─ with PostgreSQL + Redis   │
-│  3. 🐳 Docker build validation   │
-│  4. 🔒 Security vulnerability    │
-│     scan (pip-audit)             │
-└──────────────┬───────────────────┘
-               │ All pass
-               ▼
-┌──────────────────────────────────┐
-│  CD Workflow (cd.yml)            │
-│  5. 🐳 Build & push to GHCR     │
-│  6. 📦 Create Release (on tag)  │
-└──────────────────────────────────┘
-```
-
-### Adding Gemini API Key as GitHub Secret
-
-1. Go to your repo → **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Name: `GEMINI_API_KEY`
-4. Value: `your_api_key_here`
-
----
-
-## 🗂️ Supported Emission Categories
-
-| Category | Description | Example Source Data |
-|---|---|---|
-| `mobile_combustion` | Vehicle fuel consumption | Diesel, Gasoline, Litre |
-| `stationary_combustion` | Fixed facilities | Boiler, Generator, Natural Gas |
-| `electricity` | Power consumption | kWh, Electricity bill |
-| `refrigerants` | Refrigerant gases | Freon, R-22, R-134a |
-| `waste` | Waste management | Ton, m³, Waste amount |
-| `water` | Water consumption | m³, Water bill |
-| `business_travel` | Business trips | Flights, km, Tickets |
-| `employee_commuting` | Employee transport | Shuttle, km |
 
 ---
 
