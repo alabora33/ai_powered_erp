@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.database import get_db
 from backend.models import MappedRecord, UploadJob
-from backend.schemas import CategorySummary, DashboardStats
+from backend.schemas import DashboardStats
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 
@@ -88,19 +88,23 @@ async def export_records_csv(
     if records and records[0].extracted_data:
         dynamic_headers = list(records[0].extracted_data.keys())
 
-    header = ["row_number"] + dynamic_headers + ["is_valid", "confidence_score", "validation_errors"]
+    header = (
+        ["row_number"] + dynamic_headers + ["is_valid", "confidence_score", "validation_errors"]
+    )
     writer.writerow(header)
 
     for rec in records:
         row = [rec.row_number]
         for h in dynamic_headers:
             row.append((rec.extracted_data or {}).get(h, ""))
-        
-        row.extend([
-            rec.is_valid,
-            rec.confidence_score or "",
-            "; ".join(rec.validation_errors) if rec.validation_errors else "",
-        ])
+
+        row.extend(
+            [
+                rec.is_valid,
+                rec.confidence_score or "",
+                "; ".join(rec.validation_errors) if rec.validation_errors else "",
+            ]
+        )
         writer.writerow(row)
 
     output.seek(0)

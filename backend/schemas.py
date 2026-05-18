@@ -9,15 +9,18 @@ from pydantic import BaseModel, ConfigDict, Field
 
 # ─── Template Schemas ──────────────────────────────────────────────────────────
 
+
 class MappingTemplateCreate(BaseModel):
     name: str
     description: str | None = None
     target_schema: list | dict
 
+
 class MappingTemplateOut(MappingTemplateCreate):
     model_config = ConfigDict(from_attributes=True)
     id: str
     created_at: datetime
+
 
 # ─── Column Mapping Schemas ───────────────────────────────────────────────────
 

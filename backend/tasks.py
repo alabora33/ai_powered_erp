@@ -18,6 +18,7 @@ def run_async(coro):
     try:
         result = loop.run_until_complete(coro)
         from backend.database import engine
+
         loop.run_until_complete(engine.dispose())
         return result
     finally:
@@ -41,15 +42,20 @@ def process_upload(self, job_id: str) -> dict:
 
 async def _process_upload_async(task, job_id: str) -> dict:
     """Async implementation of the processing pipeline."""
+    from sqlalchemy.orm import selectinload
+
     from backend.ai_service import ai_service
     from backend.data_processor import get_sample_data, process_dataframe, read_file
     from backend.database import AsyncSessionLocal
     from backend.models import MappedRecord, UploadJob
 
-    from sqlalchemy.orm import selectinload
     async with AsyncSessionLocal() as db:
         # 1. Fetch job from DB
-        result = await db.execute(select(UploadJob).options(selectinload(UploadJob.template)).where(UploadJob.id == job_id))
+        result = await db.execute(
+            select(UploadJob)
+            .options(selectinload(UploadJob.template))
+            .where(UploadJob.id == job_id)
+        )
         job = result.scalar_one_or_none()
 
         if not job:
@@ -83,9 +89,13 @@ async def _process_upload_async(task, job_id: str) -> dict:
             else:
                 target_schema = [
                     {"name": "date", "description": "Transaction date", "type": "date"},
-                    {"name": "description", "description": "Description of the item", "type": "string"},
+                    {
+                        "name": "description",
+                        "description": "Description of the item",
+                        "type": "string",
+                    },
                     {"name": "amount", "description": "Quantity or amount", "type": "number"},
-                    {"name": "cost", "description": "Total cost or price", "type": "number"}
+                    {"name": "cost", "description": "Total cost or price", "type": "number"},
                 ]
 
             # 3. AI analysis
@@ -128,13 +138,15 @@ async def _process_upload_async(task, job_id: str) -> dict:
                 for rec in batch:
                     # Separate meta fields from mapped data
                     meta_keys = ["row_number", "raw_data", "is_valid", "validation_errors"]
-                    extracted = {k: v for k, v in rec.items() if k not in meta_keys and v is not None}
-                    
+                    extracted = {
+                        k: v for k, v in rec.items() if k not in meta_keys and v is not None
+                    }
+
                     # Convert any date objects in extracted data to ISO strings for JSON serialization
                     for k, v in extracted.items():
                         if isinstance(v, datetime):
                             extracted[k] = v.isoformat()
-                    
+
                     db_record = MappedRecord(
                         job_id=job_id,
                         row_number=rec["row_number"],

@@ -28,6 +28,7 @@ def read_file(file_path: str) -> pd.DataFrame:
         df_raw = pd.read_excel(file_path, engine="xlrd", dtype=str, header=None)
     elif ext == ".csv":
         import chardet
+
         with open(file_path, "rb") as f:
             raw = f.read(10000)
         enc = chardet.detect(raw).get("encoding", "utf-8") or "utf-8"
@@ -44,11 +45,11 @@ def read_file(file_path: str) -> pd.DataFrame:
     if len(df_raw) == 0:
         return pd.DataFrame()
 
-    # Dynamic Header Detection: 
+    # Dynamic Header Detection:
     # Find the maximum number of non-null values in any row
     row_counts = df_raw.notna().sum(axis=1)
     max_count = row_counts.max()
-    
+
     # The header is likely the first row that has >= 80% of max_count
     header_idx = df_raw.index[0]
     for idx, count in row_counts.items():
@@ -58,7 +59,7 @@ def read_file(file_path: str) -> pd.DataFrame:
 
     # Extract header and data
     columns_raw = df_raw.loc[header_idx].fillna("Unnamed").astype(str).str.strip()
-    
+
     # Ensure column names are unique
     new_cols = []
     seen = {}
@@ -69,14 +70,16 @@ def read_file(file_path: str) -> pd.DataFrame:
         else:
             seen[c] = 0
             new_cols.append(c)
-            
+
     # Set data starting from the row after the header
     int_idx = df_raw.index.get_loc(header_idx)
-    df = df_raw.iloc[int_idx + 1:].copy()
+    df = df_raw.iloc[int_idx + 1 :].copy()
     df.columns = new_cols
     df = df.reset_index(drop=True)
 
-    logger.info(f"📄 File loaded: {path.name} — Header at row {header_idx}, {len(df)} rows, {len(df.columns)} columns")
+    logger.info(
+        f"📄 File loaded: {path.name} — Header at row {header_idx}, {len(df)} rows, {len(df.columns)} columns"
+    )
     return df
 
 
@@ -211,7 +214,13 @@ def apply_mappings(
                 record[target] = parse_date(raw_value)
                 if record[target] is None:
                     errors.append(f"Could not parse date: '{raw_value}' in column '{src_col}'")
-            elif any(k in target_lower for k in ["amount", "cost", "price", "quantity", "tutar", "fiyat"]) or mapping.transformation == "numeric":
+            elif (
+                any(
+                    k in target_lower
+                    for k in ["amount", "cost", "price", "quantity", "tutar", "fiyat"]
+                )
+                or mapping.transformation == "numeric"
+            ):
                 record[target] = parse_float(raw_value)
                 if record[target] is None:
                     errors.append(f"Could not parse number: '{raw_value}' in column '{src_col}'")

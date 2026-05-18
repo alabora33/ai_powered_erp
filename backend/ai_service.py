@@ -94,15 +94,17 @@ class AIService:
 
         prompt = ANALYSIS_PROMPT_TEMPLATE.format(
             target_schema_json=json.dumps(target_schema, ensure_ascii=False, indent=2),
-            columns_json=json.dumps(columns_info, ensure_ascii=False, indent=2)
+            columns_json=json.dumps(columns_info, ensure_ascii=False, indent=2),
         )
 
         try:
-            logger.info(f"Sending {len(columns)} columns to Gemini for analysis (lang={language})...")
-            
+            logger.info(
+                f"Sending {len(columns)} columns to Gemini for analysis (lang={language})..."
+            )
+
             lang_name = "Turkish" if language == "tr" else "English"
             sys_prompt = SYSTEM_PROMPT.format(language=lang_name)
-            
+
             response = self.model.generate_content([sys_prompt, prompt])
             raw_text = response.text.strip()
 
@@ -173,7 +175,7 @@ Respond with only the description text, no quotes.
             return response.text.strip()[:200]
         except Exception as e:
             logger.warning(f"Failed to generate record description: {e}")
-            return f"Record item"
+            return "Record item"
 
     async def validate_data_quality(
         self,

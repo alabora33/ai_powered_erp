@@ -19,6 +19,7 @@ def gen_uuid() -> str:
 
 # ─── Mapping Template ───────────────────────────────────────────────────────────
 
+
 class MappingTemplate(Base):
     """Dynamic schema template for mapping various domains (E-commerce, HR, etc.)."""
 
@@ -27,13 +28,15 @@ class MappingTemplate(Base):
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=gen_uuid)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    
+
     # JSON schema definition for the target structure
     # Example: [{"name": "price", "type": "number", "description": "Item price"}]
     target_schema: Mapped[list | dict] = mapped_column(JSON, nullable=False)
-    
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 # ─── Upload Job ───────────────────────────────────────────────────────────────
