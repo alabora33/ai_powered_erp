@@ -189,8 +189,8 @@ async function openJobModal(jobId) {
     ]);
 
     document.getElementById('modalTitle').textContent = job.original_filename;
-    document.getElementById('modalSubtitle').textContent =
-      `${job.total_rows} satır · ${timeAgo(job.created_at)} · ${statusBadge(job.status)}`;
+    document.getElementById('modalSubtitle').innerHTML =
+      `${job.total_rows} satır &middot; ${timeAgo(job.created_at)} &middot; ${statusBadge(job.status)}`;
 
     const mappings = job.column_mappings?.mappings || [];
     const issues   = job.column_mappings?.data_quality_issues || [];

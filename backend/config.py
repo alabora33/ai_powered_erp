@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # ── AI / Gemini ───────────────────────────────────────────────────────────
     gemini_api_key: str = Field(default="")
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-flash-latest"
 
     # ── File Upload ───────────────────────────────────────────────────────────
     upload_dir: str = "/app/uploads"
